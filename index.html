@@ -1035,7 +1035,9 @@ async function handleLogin() {
         case "location_fail":
           msg = `You are ${data.distance || '?'}m away from classroom (allowed: ${data.allowed || '?'}m).`;
           break;
-
+        case "device_shared":
+          msg = "This device has already been used by another student today. Each student must use their own device.";
+          break;
         default:
           msg = data.error ? `Error: ${data.error}` : "Unknown error occurred.";
       }
