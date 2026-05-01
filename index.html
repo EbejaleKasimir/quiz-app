@@ -9,557 +9,226 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --purple: #673AB7;
-    --purple-light: #EDE7F6;
-    --red: #d93025;
-    --green: #1e8e3e;
-    --orange: #e37400;
-    --gray-1: #f8f9fa;
-    --gray-2: #e8eaed;
-    --gray-3: #dadce0;
-    --gray-4: #9aa0a6;
-    --gray-5: #5f6368;
-    --gray-6: #3c4043;
+    --purple: #673AB7; --purple-light: #EDE7F6;
+    --red: #d93025; --green: #1e8e3e; --orange: #e37400;
+    --gray-1: #f8f9fa; --gray-2: #e8eaed; --gray-3: #dadce0;
+    --gray-4: #9aa0a6; --gray-5: #5f6368; --gray-6: #3c4043;
     --text: #202124;
   }
-
-  body {
-    font-family: 'Roboto', sans-serif;
-    background: #f0ebf8;
-    min-height: 100vh;
-    color: var(--text);
+  body { 
+    font-family: 'Roboto', sans-serif; 
+    background: #f0ebf8; 
+    min-height: 100vh; 
+    color: var(--text); 
   }
-
-  .header {
-    background: white;
-    border-bottom: 1px solid var(--gray-3);
-    padding: 0 24px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 1px 2px rgba(0,0,0,.1);
+  .header { 
+    background: white; 
+    border-bottom: 1px solid var(--gray-3); 
+    padding: 0 24px; 
+    height: 64px; 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    position: sticky; 
+    top: 0; 
+    z-index: 100; 
+    box-shadow: 0 1px 2px rgba(0,0,0,.1); 
   }
-
-  .header-icon {
-    width: 32px;
-    height: 32px;
-    background: var(--purple);
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .header-icon { 
+    width: 32px; height: 32px; 
+    background: var(--purple); 
+    border-radius: 4px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
   }
-
-  .header-title {
-    font-family: 'Google Sans', sans-serif;
-    font-size: 22px;
-    color: var(--gray-5);
-    font-weight: 400;
+  .header-title { 
+    font-family: 'Google Sans', sans-serif; 
+    font-size: 22px; 
+    color: var(--gray-5); 
+    font-weight: 400; 
   }
-
   .header-title span { color: var(--purple); }
 
   .main { max-width: 680px; margin: 0 auto; padding: 24px 16px 80px; }
 
-  .card {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.14);
-    margin-bottom: 12px;
-    overflow: hidden;
+  .card { 
+    background: white; 
+    border-radius: 8px; 
+    box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.14); 
+    margin-bottom: 12px; 
+    overflow: hidden; 
   }
-
   .banner-card { border-top: 10px solid var(--purple); }
   .banner-content { padding: 24px; }
 
-  .form-title {
-    font-family: 'Google Sans', sans-serif;
-    font-size: 32px;
-    font-weight: 400;
-    margin-bottom: 8px;
+  .form-title { 
+    font-family: 'Google Sans', sans-serif; 
+    font-size: 32px; 
+    font-weight: 400; 
+    margin-bottom: 8px; 
   }
-
-  .form-desc {
-    font-size: 14px;
-    color: var(--gray-5);
-    line-height: 1.5;
-  }
-
-  .required-note {
-    font-size: 13px;
-    color: var(--red);
-    margin-top: 16px;
-  }
+  .form-desc { font-size: 14px; color: var(--gray-5); line-height: 1.5; }
+  .required-note { font-size: 13px; color: var(--red); margin-top: 16px; }
 
   .section { padding: 24px; }
-  .section h2 {
-    font-family: 'Google Sans', sans-serif;
-    font-size: 16px;
-    font-weight: 500;
-    margin-bottom: 4px;
-  }
-
-  .section > p {
-    font-size: 13px;
-    color: var(--gray-5);
-    margin-bottom: 20px;
-  }
-
   .field-group { margin-bottom: 20px; }
-
-  .field-label {
-    display: block;
-    font-size: 14px;
-    color: var(--gray-6);
-    margin-bottom: 8px;
-    font-weight: 500;
+  .field-label { 
+    display: block; 
+    font-size: 14px; 
+    color: var(--gray-6); 
+    margin-bottom: 8px; 
+    font-weight: 500; 
   }
-
   .field-label .req { color: var(--red); margin-left: 2px; }
 
-  .text-input {
-    width: 100%;
-    border: 1px solid var(--gray-3);
-    border-radius: 4px;
-    padding: 10px 12px;
-    font-size: 14px;
-    font-family: 'Roboto', sans-serif;
-    color: var(--text);
-    outline: none;
-    transition: border-color .15s;
+  .text-input { 
+    width: 100%; 
+    border: 1px solid var(--gray-3); 
+    border-radius: 4px; 
+    padding: 10px 12px; 
+    font-size: 14px; 
+    outline: none; 
+    transition: border-color .15s; 
+  }
+  .text-input:focus { border-color: var(--purple); border-width: 2px; }
+  .text-input.error { border-color: var(--red); border-width: 2px; }
+
+  .code-input { 
+    font-size: 22px; 
+    font-weight: 500; 
+    letter-spacing: 6px; 
+    text-align: center; 
   }
 
-  .text-input:focus {
-    border-color: var(--purple);
-    border-width: 2px;
+  .btn { 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 8px; 
+    padding: 10px 24px; 
+    border-radius: 4px; 
+    border: none; 
+    font-family: 'Google Sans', sans-serif; 
+    font-size: 14px; 
+    font-weight: 500; 
+    cursor: pointer; 
+    transition: background .15s; 
   }
+  .btn-primary, .btn-submit { background: var(--purple); color: white; }
+  .btn-primary:hover:not(:disabled), .btn-submit:hover:not(:disabled) { background: #5e35b1; }
+  .btn:disabled { background: var(--gray-3); color: var(--gray-4); cursor: not-allowed; }
 
-  .text-input.error {
-    border-color: var(--red);
-    border-width: 2px;
-  }
-
-  .code-input {
-    font-size: 22px;
-    font-weight: 500;
-    letter-spacing: 6px;
-    text-align: center;
-    font-family: 'Google Sans', sans-serif;
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 24px;
-    border-radius: 4px;
-    border: none;
-    font-family: 'Google Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background .15s;
-  }
-
-  .btn-primary, .btn-submit {
-    background: var(--purple);
-    color: white;
-  }
-
-  .btn-primary:hover:not(:disabled),
-  .btn-submit:hover:not(:disabled) {
-    background: #5e35b1;
-  }
-
-  .btn:disabled {
-    background: var(--gray-3);
-    color: var(--gray-4);
-    cursor: not-allowed;
-  }
-
-  /* GPS Block */
-  .gps-block {
-    border-radius: 8px;
-    font-size: 13px;
-    margin-bottom: 20px;
-    overflow: hidden;
-    border: 1px solid;
-  }
-
-  .gps-block.detecting { background: #fff8e1; border-color: #ffe082; color: var(--orange); }
-  .gps-block.ok { background: #e6f4ea; border-color: #a8d5b5; color: #1b5e20; }
-  .gps-block.fail { background: #fce8e6; border-color: #ef9a9a; color: #b71c1c; }
-  .gps-block.partial { background: #e8f0fe; border-color: #aecbfa; color: #1557b0; }
-
-  .gps-top {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 14px;
-  }
-
-  .gps-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .gps-block.detecting .gps-dot { background: var(--orange); animation: pulse 1.2s infinite; }
-  .gps-block.ok .gps-dot { background: var(--green); }
-  .gps-block.fail .gps-dot { background: var(--red); }
-  .gps-block.partial .gps-dot { background: #1a73e8; animation: pulse 1.2s infinite; }
-
-  .gps-msg { flex: 1; font-weight: 500; line-height: 1.4; }
-  .gps-steps { padding: 0 14px 12px 33px; font-size: 12px; line-height: 1.8; display: none; }
-  .gps-steps.visible { display: block; }
-  .gps-actions { padding: 0 14px 12px 33px; display: none; gap: 8px; }
-  .gps-actions.visible { display: flex; }
-
-  .gps-retry-btn {
-    background: white;
-    border: 1px solid currentColor;
-    border-radius: 4px;
-    padding: 6px 14px;
-    font-size: 12px;
-    font-family: 'Google Sans', sans-serif;
-    font-weight: 500;
-    cursor: pointer;
-    color: inherit;
-  }
+  /* GPS */
+  .gps-block { border-radius:8px; font-size:13px; margin-bottom:20px; overflow:hidden; border:1px solid; }
+  .gps-block.detecting { background:#fff8e1; border-color:#ffe082; color:var(--orange); }
+  .gps-block.ok { background:#e6f4ea; border-color:#a8d5b5; color:#1b5e20; }
+  .gps-block.fail { background:#fce8e6; border-color:#ef9a9a; color:#b71c1c; }
+  .gps-top { display:flex; align-items:center; gap:10px; padding:12px 14px; }
+  .gps-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .gps-block.detecting .gps-dot { background:var(--orange); animation:pulse 1.2s infinite; }
+  .gps-block.ok .gps-dot { background:var(--green); }
+  .gps-block.fail .gps-dot { background:var(--red); }
+  .gps-msg { flex:1; font-weight:500; line-height:1.4; }
+  .gps-steps { padding:0 14px 12px 33px; font-size:12px; line-height:1.8; display:none; }
+  .gps-steps.visible { display:block; }
+  .gps-actions { padding:0 14px 12px 33px; display:none; gap:8px; }
+  .gps-actions.visible { display:flex; }
+  .gps-retry-btn { background:white; border:1px solid currentColor; border-radius:4px; padding:6px 14px; font-size:12px; cursor:pointer; color:inherit; }
 
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
 
   /* Selfie */
-  .selfie-block {
-    border: 2px dashed var(--gray-3);
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    margin-bottom: 20px;
-    background: var(--gray-1);
-    transition: border-color .2s;
+  .selfie-block { 
+    border: 2px dashed var(--gray-3); 
+    border-radius: 12px; 
+    padding: 20px; 
+    text-align: center; 
+    margin-bottom: 20px; 
+    background: var(--gray-1); 
   }
-
   .selfie-block.active { border-color: var(--purple); background: #EDE7F6; }
   .selfie-block.done { border-color: var(--green); border-style: solid; background: #e6f4ea; }
 
-  .selfie-preview {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid var(--purple);
-    margin: 0 auto 12px;
-    display: none;
+  .selfie-preview { 
+    width: 120px; height: 120px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+    border: 3px solid var(--purple); 
+    margin: 0 auto 12px; 
+    display: none; 
   }
-
   .selfie-preview.visible { display: block; }
 
-  video#selfie-video {
-    width: 100%;
-    max-width: 320px;
-    height: 240px;
-    border-radius: 8px;
-    object-fit: cover;
-    display: none;
-    background: #000;
+  video#selfie-video { 
+    width: 100%; max-width: 320px; height: 240px; 
+    border-radius: 8px; object-fit: cover; 
+    display: none; background: #000; 
   }
-
   video#selfie-video.visible { display: block; margin: 0 auto 12px; }
 
-  .selfie-icon { font-size: 48px; margin-bottom: 8px; }
-  .selfie-label {
-    font-size: 14px;
-    color: var(--gray-5);
-    margin-bottom: 12px;
-    line-height: 1.4;
+  .selfie-btn { 
+    background: var(--purple); color: white; 
+    border: none; border-radius: 4px; 
+    padding: 10px 20px; font-size: 14px; 
+    font-weight: 500; cursor: pointer; 
   }
+  .selfie-btn.secondary { background: white; color: var(--purple); border: 1px solid var(--purple); }
 
-  .selfie-label strong {
-    color: var(--text);
-    display: block;
-    font-size: 15px;
-    margin-bottom: 4px;
+  .selfie-status { font-size:13px; color:var(--green); font-weight:500; margin-top:8px; display:none; }
+  .selfie-status.visible { display:block; }
+
+  /* Progress & Quiz */
+  .progress-bar { background:var(--gray-2); height:4px; border-radius:2px; margin-top:16px; overflow:hidden; }
+  .progress-fill { height:100%; background:var(--purple); transition:width .4s ease; width:0%; }
+
+  .question-card { padding:24px; }
+  .question-number { font-size:12px; color:var(--gray-4); font-weight:500; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+  .question-text { font-size:15px; color:var(--text); margin-bottom:20px; line-height:1.5; }
+  .option { display:flex; align-items:center; gap:12px; padding:12px 8px; border-radius:4px; cursor:pointer; margin-bottom:2px; }
+  .option:hover { background:var(--gray-1); }
+  .radio-circle { width:18px; height:18px; border-radius:50%; border:2px solid var(--gray-4); display:flex; align-items:center; justify-content:center; }
+  .radio-dot { width:10px; height:10px; border-radius:50%; background:var(--purple); transform:scale(0); transition:transform .15s; }
+  .option:has(input:checked) .radio-circle { border-color:var(--purple); }
+  .option:has(input:checked) .radio-dot { transform:scale(1); }
+
+  .question-error { font-size:12px; color:var(--red); margin-top:8px; display:none; }
+  .question-error.visible { display:block; }
+
+  .form-actions { display:flex; justify-content:space-between; align-items:center; }
+  .clear-link { color:var(--purple); cursor:pointer; }
+
+  .spinner { 
+    width:36px; height:36px; 
+    border:3px solid var(--gray-2); 
+    border-top-color:var(--purple); 
+    border-radius:50%; 
+    animation:spin .7s linear infinite; 
+    margin:0 auto 16px; 
   }
+  @keyframes spin { to{transform:rotate(360deg)} }
 
-  .selfie-btn {
-    background: var(--purple);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 10px 20px;
-    font-family: 'Google Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+  .loading-card { padding:48px 24px; text-align:center; }
+
+  .alert { 
+    padding:12px 16px; 
+    border-radius:6px; 
+    font-size:13px; 
+    margin-bottom:16px; 
+    display:none; 
   }
-
-  .selfie-btn:hover { background: #5e35b1; }
-  .selfie-btn.secondary {
-    background: white;
-    color: var(--purple);
-    border: 1px solid var(--purple);
-  }
-
-  .selfie-status {
-    font-size: 13px;
-    color: var(--green);
-    font-weight: 500;
-    margin-top: 8px;
-    display: none;
-  }
-
-  .selfie-status.visible { display: block; }
-
-  /* Progress & Questions */
-  .progress-bar {
-    background: var(--gray-2);
-    height: 4px;
-    border-radius: 2px;
-    margin-top: 16px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: var(--purple);
-    border-radius: 2px;
-    transition: width .4s ease;
-    width: 0%;
-  }
-
-  .question-card { padding: 24px; }
-  .question-number {
-    font-size: 12px;
-    color: var(--gray-4);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: .5px;
-    margin-bottom: 8px;
-  }
-
-  .question-text {
-    font-size: 15px;
-    color: var(--text);
-    margin-bottom: 20px;
-    line-height: 1.5;
-  }
-
-  .question-text .req { color: var(--red); margin-left: 4px; }
-
-  .option {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-bottom: 2px;
-    transition: background .1s;
-  }
-
-  .option:hover { background: var(--gray-1); }
-
-  .option input[type="radio"] { display: none; }
-
-  .radio-circle {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    border: 2px solid var(--gray-4);
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: border-color .15s;
-  }
-
-  .radio-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--purple);
-    transform: scale(0);
-    transition: transform .15s;
-  }
-
-  .option:has(input:checked) .radio-circle { border-color: var(--purple); }
-  .option:has(input:checked) .radio-dot { transform: scale(1); }
-
-  .option-label { font-size: 14px; color: var(--text); }
-
-  .question-error {
-    font-size: 12px;
-    color: var(--red);
-    margin-top: 8px;
-    display: none;
-  }
-
-  .question-error.visible { display: block; }
-
-  .form-actions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .clear-link {
-    font-size: 14px;
-    color: var(--purple);
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 4px;
-    transition: background .1s;
-  }
-
-  .clear-link:hover { background: var(--purple-light); }
-
-  .spinner {
-    width: 36px;
-    height: 36px;
-    border: 3px solid var(--gray-2);
-    border-top-color: var(--purple);
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-    margin: 0 auto 16px;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .loading-card { padding: 48px 24px; text-align: center; }
-  .loading-card p {
-    color: var(--gray-5);
-    font-size: 14px;
-    margin-top: 8px;
-  }
-
-  .alert {
-    padding: 12px 16px;
-    border-radius: 6px;
-    font-size: 13px;
-    margin-bottom: 16px;
-    display: none;
-    line-height: 1.5;
-  }
-
-  .alert.visible { display: block; }
-  .alert-error { background: #fce8e6; color: #c62828; border: 1px solid #ef9a9a; }
-  .alert-warn { background: #fff8e1; color: #b06000; border: 1px solid #ffe082; }
-
-  /* Result Page */
-  .result-card { padding: 48px 24px; text-align: center; }
-  .result-icon {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 24px;
-    font-size: 36px;
-  }
-
-  .result-icon.pass { background: #e6f4ea; }
-  .result-icon.fail { background: #fce8e6; }
-
-  .result-title {
-    font-family: 'Google Sans', sans-serif;
-    font-size: 24px;
-    font-weight: 400;
-    margin-bottom: 8px;
-  }
-
-  .result-score {
-    font-size: 48px;
-    font-weight: 300;
-    color: var(--purple);
-    font-family: 'Google Sans', sans-serif;
-    margin: 16px 0;
-  }
-
-  .result-meta {
-    font-size: 14px;
-    color: var(--gray-5);
-    margin-bottom: 24px;
-    line-height: 1.6;
-  }
-
-  .answer-review {
-    text-align: left;
-    margin-top: 24px;
-    border-top: 1px solid var(--gray-3);
-    padding-top: 24px;
-  }
-
-  .review-heading {
-    font-family: 'Google Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 500;
-    margin-bottom: 16px;
-  }
-
-  .review-item {
-    margin-bottom: 12px;
-    padding: 12px;
-    border-radius: 8px;
-  }
-
-  .review-item.correct { background: #e6f4ea; }
-  .review-item.wrong { background: #fce8e6; }
-
-  .review-q {
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: 4px;
-  }
-
-  .review-a {
-    font-size: 13px;
-    color: var(--gray-6);
-  }
-
-  .review-status {
-    font-size: 12px;
-    font-weight: 500;
-    margin-top: 4px;
-  }
-
-  .review-item.correct .review-status { color: var(--green); }
-  .review-item.wrong .review-status { color: var(--red); }
+  .alert.visible { display:block; }
+  .alert-error { background:#fce8e6; color:#c62828; border:1px solid #ef9a9a; }
 
   /* Override Field */
-  .override-field {
-    background: #fff8e1;
-    border: 1px solid #ffe082;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 16px;
-    display: none;
+  .override-field { 
+    background:#fff8e1; 
+    border:1px solid #ffe082; 
+    border-radius:8px; 
+    padding:16px; 
+    margin-bottom:16px; 
+    display:none; 
   }
-
-  .override-field.visible { display: block; }
-
-  .override-field-title {
-    font-size: 13px;
-    font-weight: 500;
-    color: #7a5800;
-    margin-bottom: 4px;
-  }
-
-  .override-field-desc {
-    font-size: 12px;
-    color: #9a6f00;
-    margin-bottom: 12px;
-    line-height: 1.5;
-  }
+  .override-field.visible { display:block; }
 
   .page { display: none; }
   .page.active { display: block; }
@@ -581,16 +250,14 @@
     <div class="card banner-card">
       <div class="banner-content">
         <div class="form-title">Class Quiz</div>
-        <div class="form-desc">Sign in with your Student ID, name, and today's session code shown on the board. Your location and identity will be verified.</div>
+        <div class="form-desc">Sign in with your Student ID, name, and session code. Device, location & identity will be verified.</div>
         <div class="required-note">* Required</div>
       </div>
     </div>
 
     <div class="card section">
       <h2>Sign In to Continue</h2>
-      <p>All fields are required. Your location will be checked automatically.</p>
 
-      <!-- GPS -->
       <div class="gps-block detecting" id="gps-block">
         <div class="gps-top">
           <div class="gps-dot"></div>
@@ -616,8 +283,7 @@
 
       <div class="field-group">
         <label class="field-label" for="session-code">Session Code <span class="req">*</span></label>
-        <input class="text-input code-input" type="text" id="session-code" placeholder="000000" maxlength="6" autocomplete="off" inputmode="numeric">
-        <div style="font-size:12px;color:var(--gray-4);margin-top:6px">Enter the 6-digit code shown on the board by your lecturer</div>
+        <input class="text-input code-input" type="text" id="session-code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="off">
       </div>
 
       <!-- Selfie -->
@@ -632,39 +298,31 @@
             <div class="selfie-icon">📷</div>
             <div class="selfie-label">
               <strong>Take a selfie to verify your identity</strong>
-              Your photo is saved alongside your submission for lecturer review.
+              Your photo will be saved for lecturer review.
             </div>
-            <button class="selfie-btn" onclick="startCamera()">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="white"><path d="M12 15.2A3.2 3.2 0 0 1 8.8 12 3.2 3.2 0 0 1 12 8.8 3.2 3.2 0 0 1 15.2 12 3.2 3.2 0 0 1 12 15.2M20 4h-3.17L15 2H9L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/></svg>
-              Open Camera
-            </button>
+            <button class="selfie-btn" onclick="startCamera()">Open Camera</button>
           </div>
 
           <div id="selfie-camera" style="display:none">
-            <div style="margin-bottom:10px;font-size:13px;color:var(--gray-5)">Position your face in the centre, then tap Capture</div>
-            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-              <button class="selfie-btn" onclick="capturePhoto()">📸 Capture</button>
-              <button class="selfie-btn secondary" onclick="cancelCamera()">Cancel</button>
-            </div>
+            <div style="margin-bottom:10px; font-size:13px; color:var(--gray-5)">Position your face and tap Capture</div>
+            <button class="selfie-btn" onclick="capturePhoto()">📸 Capture</button>
+            <button class="selfie-btn secondary" onclick="cancelCamera()">Cancel</button>
           </div>
 
           <div id="selfie-confirm" style="display:none">
-            <div style="font-size:13px;color:var(--gray-5);margin-bottom:10px">Looking good? Confirm or retake.</div>
-            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-              <button class="selfie-btn" onclick="confirmPhoto()">✓ Use this photo</button>
-              <button class="selfie-btn secondary" onclick="retakePhoto()">↻ Retake</button>
-            </div>
+            <button class="selfie-btn" onclick="confirmPhoto()">✓ Use this photo</button>
+            <button class="selfie-btn secondary" onclick="retakePhoto()">↻ Retake</button>
           </div>
           <div class="selfie-status" id="selfie-status">✅ Photo captured — identity verified</div>
         </div>
       </div>
 
-      <!-- Override Code -->
+      <!-- Device Override -->
       <div class="override-field" id="override-field">
         <div class="override-field-title">🔓 Device Override Required</div>
-        <div class="override-field-desc">Your Student ID was used on a different device today. Ask your lecturer for a one-time override code.</div>
+        <div class="override-field-desc">This Student ID was already used on a different device today. Ask your lecturer for a one-time override code.</div>
         <label class="field-label" for="override-code">Override Code <span class="req">*</span></label>
-        <input class="text-input code-input" type="text" id="override-code" placeholder="000000" maxlength="6" autocomplete="off" inputmode="numeric">
+        <input class="text-input code-input" type="text" id="override-code" placeholder="000000" maxlength="6" inputmode="numeric">
       </div>
 
       <button class="btn btn-primary" id="login-btn" onclick="handleLogin()" style="width:100%; justify-content:center;">
@@ -676,9 +334,7 @@
   <!-- LOADING PAGE -->
   <div class="page" id="page-loading">
     <div class="card banner-card">
-      <div class="banner-content">
-        <div class="form-title">Class Quiz</div>
-      </div>
+      <div class="banner-content"><div class="form-title">Class Quiz</div></div>
     </div>
     <div class="card loading-card">
       <div class="spinner"></div>
@@ -695,7 +351,6 @@
         <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
       </div>
     </div>
-
     <div id="questions-container"></div>
 
     <div class="card section">
@@ -710,9 +365,7 @@
   <!-- RESULT PAGE -->
   <div class="page" id="page-result">
     <div class="card banner-card">
-      <div class="banner-content">
-        <div class="form-title">Your Results</div>
-      </div>
+      <div class="banner-content"><div class="form-title">Your Results</div></div>
     </div>
     <div class="card">
       <div class="result-card" id="result-content"></div>
@@ -723,9 +376,9 @@
 
 <script>
 // ====================== CONFIG ======================
-const API_URL = "https://script.google.com/macros/s/AKfycbzKhsEI6dvR4N2pN9CxwUMO77k-q6ypEfzgLDXOuzDpONbAPS5SAGjFDqff3YRD4BX2/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzKhsEI6dvR4N2pN9CxwUMO77k-q6ypEfzgLDXOuzDpONbAPS5SAGjFDqff3YRD4BX2/exec"; 
+// ← Change this to your latest deployed URL
 
-// ====================== VARIABLES ======================
 let currentUser = null;
 let quizQuestions = [];
 let answers = {};
@@ -735,50 +388,41 @@ let selfieDataUrl = null;
 let selfieConfirmed = false;
 let cameraStream = null;
 let gpsWatcher = null;
-let gpsAttempt = 0;
 
 // ====================== DEVICE FINGERPRINT ======================
 async function getFingerprint() {
   const raw = [
     navigator.userAgent,
     navigator.language,
-    screen.width + 'x' + screen.height,
-    screen.colorDepth,
+    screen.width + 'x' + screen.height + 'x' + screen.colorDepth,
     new Date().getTimezoneOffset(),
     navigator.hardwareConcurrency || '',
-    navigator.platform || ''
+    navigator.platform || '',
+    window.indexedDB ? 'idb' : '',
+    navigator.cookieEnabled ? 'cookies' : ''
   ].join('|');
 
-  const buf = new TextEncoder().encode(raw);
-  const hash = await crypto.subtle.digest('SHA-256', buf);
-  return Array.from(new Uint8Array(hash))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('')
-    .slice(0, 32);
+  const encoder = new TextEncoder();
+  const data = encoder.encode(raw);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 40);
 }
 
 // ====================== GPS ======================
 function initGPS() {
   if (!navigator.geolocation) {
-    setGpsStatus('fail', '📵 GPS not supported on this browser', ['Try Chrome or Safari on your phone.']);
+    setGpsStatus('fail', 'GPS not supported');
     return;
   }
   requestGPS();
 }
 
 function requestGPS() {
-  gpsAttempt++;
-  setGpsStatus('detecting', `📡 Detecting your location… (attempt ${gpsAttempt})`);
-
-  if (gpsWatcher) {
-    navigator.geolocation.clearWatch(gpsWatcher);
-    gpsWatcher = null;
-  }
-
+  setGpsStatus('detecting', 'Detecting your location…');
   navigator.geolocation.getCurrentPosition(onGPSSuccess, onGPSError, {
-    enableHighAccuracy: false,
-    timeout: 8000,
-    maximumAge: 10000
+    enableHighAccuracy: true,
+    timeout: 15000,
+    maximumAge: 0
   });
 }
 
@@ -786,22 +430,11 @@ function onGPSSuccess(pos) {
   userLat = pos.coords.latitude;
   userLng = pos.coords.longitude;
   gpsReady = true;
-  setGpsStatus('ok', `✅ Location ready — accuracy ±${Math.round(pos.coords.accuracy)}m`);
+  setGpsStatus('ok', `Location ready (±${Math.round(pos.coords.accuracy)}m)`);
 }
 
 function onGPSError(err) {
-  const msgs = {
-    1: '🔒 Location permission denied',
-    2: '📴 GPS is turned off',
-    3: '⏱ Location timed out'
-  };
-  const tips = {
-    1: ['When asked "Allow location?", tap Allow.', 'If denied: phone Settings → Chrome → Location → Allow.'],
-    2: ['Turn on Location/GPS in phone Settings.', 'Move near a window then tap Try Again.'],
-    3: ['GPS slow indoors — move near a window.', 'Tap Try Again.']
-  };
-
-  setGpsStatus('fail', msgs[err.code] || '⚠️ Location error', tips[err.code] || ['Tap ↻ Try Again.']);
+  setGpsStatus('fail', 'Location access failed. Please allow location permission.');
 }
 
 function retryGPS() {
@@ -809,36 +442,23 @@ function retryGPS() {
   requestGPS();
 }
 
-function setGpsStatus(type, msg, steps = []) {
+function setGpsStatus(type, msg) {
   const block = document.getElementById('gps-block');
   block.className = `gps-block ${type}`;
   document.getElementById('gps-msg').textContent = msg;
-
-  const stepsEl = document.getElementById('gps-steps');
-  const actionsEl = document.getElementById('gps-actions');
-
-  if (steps.length) {
-    stepsEl.innerHTML = steps.map(s => `<li>${s}</li>`).join('');
-    stepsEl.classList.add('visible');
-    actionsEl.classList.add('visible');
-  } else {
-    stepsEl.classList.remove('visible');
-    (type === 'fail' || type === 'partial') ? actionsEl.classList.add('visible') : actionsEl.classList.remove('visible');
-  }
 }
 
 // ====================== SELFIE ======================
 async function startCamera() {
   try {
-    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
-    const video = document.getElementById('selfie-video');
-    video.srcObject = cameraStream;
-    video.classList.add('visible');
+    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+    document.getElementById('selfie-video').srcObject = cameraStream;
+    document.getElementById('selfie-video').classList.add('visible');
     document.getElementById('selfie-idle').style.display = 'none';
     document.getElementById('selfie-camera').style.display = 'block';
     document.getElementById('selfie-block').classList.add('active');
   } catch (e) {
-    showAlert(document.getElementById('login-alert'), '📷 Camera access denied. Please allow camera permission.');
+    showAlert(document.getElementById('login-alert'), "Camera access denied. Please allow camera permission.");
   }
 }
 
@@ -848,12 +468,10 @@ function capturePhoto() {
   canvas.width = video.videoWidth || 320;
   canvas.height = video.videoHeight || 240;
   canvas.getContext('2d').drawImage(video, 0, 0);
+  selfieDataUrl = canvas.toDataURL('image/jpeg', 0.7);
 
-  selfieDataUrl = canvas.toDataURL('image/jpeg', 0.75);
-  const preview = document.getElementById('selfie-preview');
-  preview.src = selfieDataUrl;
-  preview.classList.add('visible');
-
+  document.getElementById('selfie-preview').src = selfieDataUrl;
+  document.getElementById('selfie-preview').classList.add('visible');
   document.getElementById('selfie-video').classList.remove('visible');
   document.getElementById('selfie-camera').style.display = 'none';
   document.getElementById('selfie-confirm').style.display = 'block';
@@ -864,7 +482,6 @@ function confirmPhoto() {
   stopCamera();
   document.getElementById('selfie-confirm').style.display = 'none';
   document.getElementById('selfie-status').classList.add('visible');
-  document.getElementById('selfie-block').classList.remove('active');
   document.getElementById('selfie-block').classList.add('done');
 }
 
@@ -887,51 +504,55 @@ function cancelCamera() {
 
 function stopCamera() {
   if (cameraStream) {
-    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream.getTracks().forEach(t => t.stop());
     cameraStream = null;
   }
 }
 
 // ====================== API ======================
 async function post(action, payload = {}) {
-  const response = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ action, ...payload })
-  });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  return response.json();
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action, ...payload })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error(err);
+    throw new Error("Failed to connect to server. Please check your internet or script deployment.");
+  }
 }
 
-// ====================== PAGE MANAGEMENT ======================
+// ====================== PAGE CONTROL ======================
 function showPage(id) {
-  document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo(0, 0);
 }
 
-// ====================== LOGIN ======================
+function showAlert(el, msg) {
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+
+// ====================== LOGIN (Improved Device Blocking) ======================
 async function handleLogin() {
-  const id = document.getElementById('student-id').value.trim();
+  const studentId = document.getElementById('student-id').value.trim();
   const name = document.getElementById('student-name').value.trim();
   const code = document.getElementById('session-code').value.trim();
   const overrideCode = document.getElementById('override-code').value.trim() || null;
 
   const alertEl = document.getElementById('login-alert');
-  const btn = document.getElementById('login-btn');
-
   alertEl.classList.remove('visible');
-  ['student-id', 'student-name', 'session-code', 'override-code'].forEach(f => {
-    const el = document.getElementById(f);
-    if (el) el.classList.remove('error');
-  });
 
-  if (!id || !name || !code) {
-    showAlert(alertEl, "Please fill in all required fields.");
+  if (!studentId || !name || !code) {
+    showAlert(alertEl, "Please fill in all fields.");
     return;
   }
   if (code.length !== 6 || !/^\d+$/.test(code)) {
-    document.getElementById('session-code').classList.add('error');
     showAlert(alertEl, "Session code must be 6 digits.");
     return;
   }
@@ -940,10 +561,11 @@ async function handleLogin() {
     return;
   }
   if (!gpsReady) {
-    showAlert(alertEl, "Location is still being detected. Please wait or tap 'Try Again'.");
+    showAlert(alertEl, "Location detection is still in progress.");
     return;
   }
 
+  const btn = document.getElementById('login-btn');
   btn.disabled = true;
   btn.textContent = "Verifying…";
 
@@ -951,63 +573,56 @@ async function handleLogin() {
     const fingerprint = await getFingerprint();
 
     const data = await post("login", {
-      id, name, code, lat: userLat, lng: userLng,
-      fingerprint, selfie: selfieDataUrl, overrideCode
+      id: studentId,
+      name: name,
+      code: code,
+      lat: userLat,
+      lng: userLng,
+      fingerprint: fingerprint,
+      selfie: selfieDataUrl,
+      overrideCode: overrideCode
     });
 
     if (data.ok) {
-      currentUser = { id, name: data.name || name, dept: data.dept };
+      currentUser = { id: studentId, name: data.name || name, dept: data.dept };
       showPage('page-loading');
       await loadQuestions();
     } else {
-      const errorMap = {
-        id_not_found: ["student-id", "This Student ID is not registered."],
-        name_mismatch: ["student-name", "Name does not match this Student ID."],
-        already_submitted: [null, "You have already submitted this quiz."],
-        device_locked: [null, "Device locked. Ask lecturer for override code."],
-        override_invalid: ["override-code", "Invalid override code."],
-        invalid_code: ["session-code", "Invalid session code."],
-        session_expired: ["session-code", "Session code has expired."],
-        location_fail: [null, `You are outside the classroom (${data.distance || '?'}m away).`],
-      };
-
-      const [field, msg] = errorMap[data.error] || [null, "Login failed. Please try again."];
-
-      if (field) document.getElementById(field).classList.add('error');
       if (data.error === "device_locked") {
         document.getElementById('override-field').classList.add('visible');
+        showAlert(alertEl, "This Student ID was used on another device today. Ask your lecturer for an override code.");
+      } else if (data.error === "already_submitted") {
+        showAlert(alertEl, "You have already submitted this quiz.");
+      } else {
+        showAlert(alertEl, data.message || "Login failed. Please try again.");
       }
-
-      showAlert(alertEl, msg);
     }
   } catch (e) {
     showAlert(alertEl, "Connection error: " + e.message);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `Start Quiz`;
+    btn.textContent = "Start Quiz";
   }
 }
 
-// ====================== LOAD QUESTIONS ======================
+// ====================== QUIZ FUNCTIONS ======================
 async function loadQuestions() {
   try {
     const data = await post("questions", { id: currentUser.id });
     if (!data.ok) {
-      document.getElementById('loading-msg').textContent = data.error || "Failed to load quiz.";
+      document.getElementById('loading-msg').textContent = "Failed to load questions.";
       return;
     }
     quizQuestions = data.questions || [];
     renderQuiz();
     showPage('page-quiz');
   } catch (e) {
-    document.getElementById('loading-msg').textContent = "Error loading questions.";
+    document.getElementById('loading-msg').textContent = "Error loading quiz.";
   }
 }
 
-// ====================== RENDER QUIZ ======================
 function renderQuiz() {
-  document.getElementById('quiz-welcome').textContent = 
-    `Welcome, ${currentUser.name} (${currentUser.dept})! Answer all ${quizQuestions.length} questions.`;
+  document.getElementById('quiz-welcome').textContent = `Welcome, ${currentUser.name} (${currentUser.dept})!`;
 
   const container = document.getElementById('questions-container');
   container.innerHTML = '';
@@ -1016,7 +631,6 @@ function renderQuiz() {
     const card = document.createElement('div');
     card.className = 'card question-card';
     card.id = `card-${q.id}`;
-
     card.innerHTML = `
       <div class="question-number">Question ${i+1} of ${quizQuestions.length}</div>
       <div class="question-text">${q.text} <span class="req">*</span></div>
@@ -1027,11 +641,10 @@ function renderQuiz() {
           <span class="option-label">${opt}</span>
         </label>
       `).join('')}
-      <div class="question-error" id="err-${q.id}">This question is required.</div>
+      <div class="question-error" id="err-${q.id}">This is a required question.</div>
     `;
     container.appendChild(card);
   });
-
   updateProgress();
 }
 
@@ -1042,12 +655,12 @@ function onAnswer(qid, val) {
 }
 
 function updateProgress() {
-  const progress = quizQuestions.length ? (Object.keys(answers).length / quizQuestions.length) * 100 : 0;
-  document.getElementById('progress-fill').style.width = `${progress}%`;
+  const percent = quizQuestions.length ? (Object.keys(answers).length / quizQuestions.length) * 100 : 0;
+  document.getElementById('progress-fill').style.width = percent + '%';
 }
 
 function clearForm() {
-  if (!confirm('Clear all answers?')) return;
+  if (!confirm("Clear all answers?")) return;
   answers = {};
   quizQuestions.forEach(q => {
     document.querySelectorAll(`input[name="${q.id}"]`).forEach(r => r.checked = false);
@@ -1056,10 +669,8 @@ function clearForm() {
   updateProgress();
 }
 
-// ====================== SUBMIT ======================
 async function handleSubmit() {
   if (submitted) return;
-
   const alertEl = document.getElementById('submit-alert');
   alertEl.classList.remove('visible');
 
@@ -1073,10 +684,6 @@ async function handleSubmit() {
 
   if (!allAnswered) {
     showAlert(alertEl, "Please answer all questions.");
-    const firstUnanswered = quizQuestions.find(q => answers[q.id] === undefined);
-    if (firstUnanswered) {
-      document.getElementById(`card-${firstUnanswered.id}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
     return;
   }
 
@@ -1085,17 +692,12 @@ async function handleSubmit() {
   btn.textContent = "Submitting…";
 
   try {
-    const data = await post("submit", {
-      id: currentUser.id,
-      name: currentUser.name,
-      answers: answers
-    });
-
+    const data = await post("submit", { id: currentUser.id, answers: answers });
     if (data.ok) {
       submitted = true;
       showResults(data);
     } else {
-      showAlert(alertEl, data.error || "Submission failed.");
+      showAlert(alertEl, data.message || "Submission failed.");
       btn.disabled = false;
       btn.textContent = "Submit";
     }
@@ -1108,52 +710,37 @@ async function handleSubmit() {
 
 function showResults(data) {
   const { score, total, gradedAnswers } = data;
-  const percentage = Math.round((score / total) * 100);
-  const pass = percentage >= 60;
+  const pct = Math.round((score / total) * 100);
+  const pass = pct >= 60;
 
-  let reviewHTML = quizQuestions.map((q, i) => {
+  let review = '';
+  quizQuestions.forEach((q, i) => {
     const g = gradedAnswers[q.id];
-    return `
+    review += `
       <div class="review-item ${g.isCorrect ? 'correct' : 'wrong'}">
         <div class="review-q">Q${i+1}. ${q.text}</div>
-        <div class="review-a">Your answer: <strong>${q.options[g.userAnswer] || 'No answer'}</strong></div>
+        <div class="review-a">Your answer: <strong>${q.options[g.userAnswer] || '—'}</strong></div>
         ${!g.isCorrect ? `<div class="review-a">Correct: <strong>${q.options[g.correctAnswer]}</strong></div>` : ''}
         <div class="review-status">${g.isCorrect ? '✓ Correct' : '✗ Incorrect'}</div>
       </div>`;
-  }).join('');
+  });
 
   document.getElementById('result-content').innerHTML = `
     <div class="result-icon ${pass ? 'pass' : 'fail'}">${pass ? '🎉' : '📝'}</div>
     <div class="result-title">${pass ? 'Well done!' : 'Keep practising!'}</div>
-    <div style="font-size:13px;color:var(--gray-5);margin-bottom:4px">
-      <strong>${currentUser.name}</strong> · ${currentUser.id} · ${currentUser.dept}
-    </div>
     <div class="result-score">${score}/${total}</div>
-    <div class="result-meta">
-      You scored <strong>${percentage}%</strong> — ${score} of ${total} correct.<br>
-      ${pass ? 'Congratulations, you passed!' : 'Passing score is 60%.'}<br>
-      <span style="color:var(--green);font-size:12px">✓ Attendance, photo & response saved.</span>
-    </div>
-    <div class="answer-review">
-      <div class="review-heading">Answer Review</div>
-      ${reviewHTML}
-    </div>
+    <div class="result-meta">You scored <strong>${pct}%</strong><br>${pass ? 'Congratulations, you passed!' : 'Passing is 60%.'}</div>
+    <div class="answer-review"><div class="review-heading">Answer Review</div>${review}</div>
   `;
 
   showPage('page-result');
 }
 
-function showAlert(el, msg) {
-  el.textContent = msg;
-  el.classList.add('visible');
-}
-
-// ====================== INITIALIZATION ======================
+// ====================== INITIALIZE ======================
 document.addEventListener('DOMContentLoaded', () => {
   initGPS();
 });
 
-// Allow Enter key on login page
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.getElementById('page-login').classList.contains('active')) {
     handleLogin();
