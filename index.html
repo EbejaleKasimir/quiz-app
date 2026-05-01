@@ -739,24 +739,28 @@ let gpsAttempt = 0;
 
 // ====================== DEVICE FINGERPRINT ======================
 async function getFingerprint() {
-  const raw = [
+  const components = [
     navigator.userAgent,
     navigator.language,
-    screen.width + 'x' + screen.height,
+    screen.width + "x" + screen.height,
     screen.colorDepth,
     new Date().getTimezoneOffset(),
-    navigator.hardwareConcurrency || '',
-    navigator.platform || ''
+    navigator.hardwareConcurrency || "hc",
+    navigator.platform || "p",
+    // Optional: add more stable signals
+    window.innerWidth + "x" + window.innerHeight
   ].join('|');
 
-  const buf = new TextEncoder().encode(raw);
-  const hash = await crypto.subtle.digest('SHA-256', buf);
+  const encoder = new TextEncoder();
+  const data = encoder.encode(components);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  
   return Array.from(new Uint8Array(hash))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('')
-    .slice(0, 32);
+    .slice(0, 40);   // increased to 40 chars for better uniqueness
 }
-
+ 
 // ====================== GPS ======================
 function initGPS() {
   if (!navigator.geolocation) {
@@ -912,10 +916,13 @@ function showPage(id) {
 
 // ====================== LOGIN ======================
 async function handleLogin() {
-  const id = document.getElementById('student-id').value.trim();
+  // Reset override field on every new attempt
+  document.getElementById('override-field').classList.remove('visible');
+
+  const id = document.getElementById('student-id').value.trim().toUpperCase();
   const name = document.getElementById('student-name').value.trim();
   const code = document.getElementById('session-code').value.trim();
-  const overrideCode = document.getElementById('override-code').value.trim() || null;
+  let overrideCode = document.getElementById('override-code').value.trim() || null;
 
   const alertEl = document.getElementById('login-alert');
   const btn = document.getElementById('login-btn');
@@ -945,49 +952,94 @@ async function handleLogin() {
   }
 
   btn.disabled = true;
-  btn.textContent = "Verifying…";
+  btn.textContent = "Verifying...";
 
   try {
     const fingerprint = await getFingerprint();
 
-    const data = await post("login", {
-      id, name, code, lat: userLat, lng: userLng,
-      fingerprint, selfie: selfieDataUrl, overrideCode
-    });
+    const payload = {
+      id,
+      name,
+      code,
+      lat: userLat,
+      lng: userLng,
+      fingerprint,
+      selfie: selfieDataUrl
+    };
+
+    // Only include overrideCode if user actually entered something
+    if (overrideCode) {
+      payload.overrideCode = overrideCode;
+    }
+
+    const data = await post("login", payload);
 
     if (data.ok) {
       currentUser = { id, name: data.name || name, dept: data.dept };
       showPage('page-loading');
       await loadQuestions();
-    } else {
-      const errorMap = {
-        id_not_found: ["student-id", "This Student ID is not registered."],
-        name_mismatch: ["student-name", "Name does not match this Student ID."],
-        already_submitted: [null, "You have already submitted this quiz."],
-        device_locked: [null, "Device locked. Ask lecturer for override code."],
-        override_invalid: ["override-code", "Invalid override code."],
-        invalid_code: ["session-code", "Invalid session code."],
-        session_expired: ["session-code", "Session code has expired."],
-        location_fail: [null, `You are outside the classroom (${data.distance || '?'}m away).`],
-      };
+    } 
+    else {
+      let msg = "Login failed. Please try again.";
+      let field = null;
 
-      const [field, msg] = errorMap[data.error] || [null, "Login failed. Please try again."];
+      switch(data.error) {
+        case "id_not_found":
+          field = "student-id";
+          msg = "This Student ID is not registered.";
+          break;
+        case "name_mismatch":
+          field = "student-name";
+          msg = "Name does not match this Student ID.";
+          break;
+        case "already_submitted":
+          msg = "You have already submitted this quiz.";
+          break;
 
-      if (field) document.getElementById(field).classList.add('error');
-      if (data.error === "device_locked") {
-        document.getElementById('override-field').classList.add('visible');
+        case "device_locked":
+          msg = "This device is locked for your Student ID today.";
+          document.getElementById('override-field').classList.add('visible');
+          break;
+
+        case "override_invalid":
+          field = "override-code";
+          msg = "Invalid override code.";
+          break;
+        case "override_used":
+          msg = "This override code has already been used.";
+          break;
+        case "override_expired":
+          msg = "Override code has expired. Ask your lecturer for a new one.";
+          break;
+
+        case "invalid_code":
+          field = "session-code";
+          msg = "Invalid session code.";
+          break;
+        case "session_expired":
+          field = "session-code";
+          msg = "Session has expired.";
+          break;
+        case "location_fail":
+          msg = `You are outside the classroom (${data.distance || '?'}m away, allowed: ${data.allowed || '?'}m).`;
+          break;
+
+        default:
+          msg = data.error ? `Error: ${data.error}` : "Unknown error occurred.";
       }
 
+      if (field) {
+        document.getElementById(field).classList.add('error');
+      }
       showAlert(alertEl, msg);
     }
   } catch (e) {
     showAlert(alertEl, "Connection error: " + e.message);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `Start Quiz`;
+    btn.textContent = "Start Quiz";
   }
 }
-
 // ====================== LOAD QUESTIONS ======================
 async function loadQuestions() {
   try {
