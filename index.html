@@ -742,13 +742,12 @@ async function getFingerprint() {
   const components = [
     navigator.userAgent,
     navigator.language,
-    screen.width + "x" + screen.height,
-    screen.colorDepth,
-    new Date().getTimezoneOffset(),
-    navigator.hardwareConcurrency || "hc",
-    navigator.platform || "p",
-    // Optional: add more stable signals
-    window.innerWidth + "x" + window.innerHeight
+    screen.width + "x" + screen.height + "x" + screen.colorDepth,
+    navigator.hardwareConcurrency || '',
+    navigator.platform || '',
+    // Add these for better stability on mobile
+    window.screen.orientation ? window.screen.orientation.type : '',
+    'touch' in navigator ? 'touch' : ''
   ].join('|');
 
   const encoder = new TextEncoder();
@@ -758,7 +757,7 @@ async function getFingerprint() {
   return Array.from(new Uint8Array(hash))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('')
-    .slice(0, 40);   // increased to 40 chars for better uniqueness
+    .slice(0, 48);   // longer hash = better uniqueness
 }
  
 // ====================== GPS ======================
