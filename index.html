@@ -745,20 +745,36 @@ async function getFingerprint() {
     screen.width + "x" + screen.height + "x" + screen.colorDepth,
     navigator.hardwareConcurrency || '',
     navigator.platform || '',
-    // Add these for better stability on mobile
     window.screen.orientation ? window.screen.orientation.type : '',
-    'touch' in navigator ? 'touch' : ''
+    'touch' in navigator ? 'touch' : '',
+    new Date().getTimezoneOffset()
   ].join('|');
 
-  const encoder = new TextEncoder();
-  const data = encoder.encode(components);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  
-  return Array.from(new Uint8Array(hash))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('')
-    .slice(0, 48);   // longer hash = better uniqueness
+  // Try secure crypto first
+  if (window.crypto && window.crypto.subtle) {
+    try {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(components);
+      const hash = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(hash))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('')
+        .slice(0, 48);
+    } catch (e) {
+      console.warn('crypto.subtle failed, falling back', e);
+    }
+  }
+
+  // Fallback: simple hash (not cryptographically strong, but sufficient for device fingerprint)
+  let hash = 0;
+  for (let i = 0; i < components.length; i++) {
+    const char = components.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(16).padStart(8, '0').repeat(6).slice(0, 48);
 }
+ 
  
 // ====================== GPS ======================
 function initGPS() {
