@@ -50,13 +50,11 @@
   .gps-block.detecting { background:#fff8e1; border-color:#ffe082; color:var(--orange); }
   .gps-block.ok { background:#e6f4ea; border-color:#a8d5b5; color:#1b5e20; }
   .gps-block.fail { background:#fce8e6; border-color:#ef9a9a; color:#b71c1c; }
-  .gps-block.partial { background:#e8f0fe; border-color:#aecbfa; color:#1557b0; }
   .gps-top { display:flex; align-items:center; gap:10px; padding:12px 14px; }
   .gps-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
   .gps-block.detecting .gps-dot { background:var(--orange); animation:pulse 1.2s infinite; }
   .gps-block.ok .gps-dot { background:var(--green); }
   .gps-block.fail .gps-dot { background:var(--red); }
-  .gps-block.partial .gps-dot { background:#1a73e8; animation:pulse 1.2s infinite; }
   .gps-msg { flex:1; font-weight:500; line-height:1.4; }
   .gps-steps { padding:0 14px 12px 33px; font-size:12px; line-height:1.8; display:none; }
   .gps-steps.visible { display:block; }
@@ -82,11 +80,12 @@
   .selfie-status { font-size:13px; color:var(--green); font-weight:500; margin-top:8px; display:none; }
   .selfie-status.visible { display:block; }
 
-  /* Override Field */
-  .override-field { background:#fff8e1; border:1px solid #ffe082; border-radius:8px; padding:16px; margin-bottom:16px; display:none; }
-  .override-field.visible { display:block; }
-  .override-field-title { font-size:13px; font-weight:500; color:#7a5800; margin-bottom:4px; }
-  .override-field-desc { font-size:12px; color:#9a6f00; margin-bottom:12px; line-height:1.5; }
+  /* Device Blocked & Override */
+  .device-blocked, .override-field { 
+    background:#fce8e6; border:1px solid #ef9a9a; border-radius:8px; padding:16px; margin-bottom:16px; display:none; 
+  }
+  .device-blocked.visible, .override-field.visible { display:block; }
+  .device-blocked { background:#fff8e1; border-color:#ffe082; color:#b06000; }
 
   .progress-bar { background:var(--gray-2); height:4px; border-radius:2px; margin-top:16px; overflow:hidden; }
   .progress-fill { height:100%; background:var(--purple); border-radius:2px; transition:width .4s ease; width:0%; }
@@ -99,7 +98,7 @@
   .option { display:flex; align-items:center; gap:12px; padding:12px 8px; border-radius:4px; cursor:pointer; margin-bottom:2px; transition:background .1s; }
   .option:hover { background:var(--gray-1); }
   .option input[type="radio"] { display:none; }
-  .radio-circle { width:18px; height:18px; border-radius:50%; border:2px solid var(--gray-4); flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:border-color .15s; }
+  .radio-circle { width:18px; height:18px; border-radius:50%; border:2px solid var(--gray-4); flex-shrink:0; display:flex; align-items:center; justify-content:center; }
   .radio-dot { width:10px; height:10px; border-radius:50%; background:var(--purple); transform:scale(0); transition:transform .15s; }
   .option:has(input:checked) .radio-circle { border-color:var(--purple); }
   .option:has(input:checked) .radio-dot { transform:scale(1); }
@@ -109,15 +108,12 @@
   .question-error.visible { display:block; }
 
   .form-actions { display:flex; align-items:center; justify-content:space-between; }
-  .clear-link { font-size:14px; color:var(--purple); cursor:pointer; padding:8px; border-radius:4px; transition:background .1s; }
+  .clear-link { font-size:14px; color:var(--purple); cursor:pointer; padding:8px; border-radius:4px; }
   .clear-link:hover { background:var(--purple-light); }
 
   .spinner { width:36px; height:36px; border:3px solid var(--gray-2); border-top-color:var(--purple); border-radius:50%; animation:spin .7s linear infinite; margin:0 auto 16px; }
   @keyframes spin { to{transform:rotate(360deg)} }
-
   .loading-card { padding:48px 24px; text-align:center; }
-  .loading-card p { color:var(--gray-5); font-size:14px; margin-top:8px; }
-
   .alert { padding:12px 16px; border-radius:6px; font-size:13px; margin-bottom:16px; display:none; line-height:1.5; }
   .alert.visible { display:block; }
   .alert-error { background:#fce8e6; color:#c62828; border:1px solid #ef9a9a; }
@@ -144,7 +140,6 @@
   .page { display:none; }
   .page.active { display:block; animation:fadeIn .3s ease; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-  .divider { border:none; border-top:1px solid var(--gray-3); margin:20px 0; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
 </style>
 </head>
@@ -163,14 +158,14 @@
     <div class="card banner-card">
       <div class="banner-content">
         <div class="form-title">Class Quiz</div>
-        <div class="form-desc">Sign in with your Student ID, name, and today's session code. Location and identity will be verified.</div>
+        <div class="form-desc">Sign in with your Student ID. <strong>One student per device only.</strong></div>
         <div class="required-note">* Required</div>
       </div>
     </div>
 
     <div class="card section">
       <h2>Sign In to Continue</h2>
-      <p>All fields are required. Your location will be checked automatically.</p>
+      <p>All fields are required. Your device will be locked to your Student ID.</p>
 
       <!-- GPS -->
       <div class="gps-block detecting" id="gps-block">
@@ -217,7 +212,6 @@
               Your photo is saved for lecturer review.
             </div>
             <button class="selfie-btn" onclick="startCamera()">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="white"><path d="M12 15.2A3.2 3.2 0 0 1 8.8 12 3.2 3.2 0 0 1 12 8.8 3.2 3.2 0 0 1 15.2 12 3.2 3.2 0 0 1 12 15.2M20 4h-3.17L15 2H9L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/></svg>
               Open Camera
             </button>
           </div>
@@ -242,10 +236,17 @@
         </div>
       </div>
 
+      <!-- Device Blocked Message -->
+      <div class="device-blocked" id="device-blocked">
+        <strong>Device Already Registered</strong><br>
+        This device has already been used by another student today.<br>
+        <small>Only one student is allowed per device per session.</small>
+      </div>
+
       <!-- Override Field -->
       <div class="override-field" id="override-field">
-        <div class="override-field-title">🔓 Device Override Required</div>
-        <div class="override-field-desc">Your Student ID was used on a different device today. Ask your lecturer for a one-time override code.</div>
+        <div class="override-field-title">🔓 Lecturer Override Required</div>
+        <div class="override-field-desc">This device is locked. Ask your lecturer for a one-time override code.</div>
         <label class="field-label" for="override-code">Override Code <span class="req">*</span></label>
         <input class="text-input code-input" type="text" id="override-code" placeholder="000000" maxlength="6" autocomplete="off" inputmode="numeric">
       </div>
@@ -320,7 +321,8 @@ async function getFingerprint() {
     new Date().getTimezoneOffset(),
     navigator.hardwareConcurrency || '',
     navigator.platform || '',
-    window.innerWidth + 'x' + window.innerHeight
+    window.innerWidth + 'x' + window.innerHeight,
+    navigator.vendor
   ].join('|');
 
   const buf = new TextEncoder().encode(raw);
@@ -328,13 +330,13 @@ async function getFingerprint() {
   return Array.from(new Uint8Array(hash))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('')
-    .slice(0, 40);
+    .slice(0, 64);
 }
 
 // ====================== GPS ======================
 function initGPS() {
   if (!navigator.geolocation) {
-    setGpsStatus('fail', '📵 GPS not supported on this browser');
+    setGpsStatus('fail', '📵 GPS not supported');
     return;
   }
   requestGPS();
@@ -342,25 +344,19 @@ function initGPS() {
 
 function requestGPS() {
   gpsAttempt++;
-  setGpsStatus('detecting', `📡 Detecting your location… (attempt ${gpsAttempt})`);
+  setGpsStatus('detecting', `📡 Detecting location... (attempt ${gpsAttempt})`);
 
-  if (gpsWatcher) {
-    navigator.geolocation.clearWatch(gpsWatcher);
-    gpsWatcher = null;
-  }
+  if (gpsWatcher) navigator.geolocation.clearWatch(gpsWatcher);
 
   navigator.geolocation.getCurrentPosition(onGPSSuccess, () => {
-    setGpsStatus('partial', '⏳ GPS taking longer, still trying…');
-    gpsWatcher = navigator.geolocation.watchPosition(onGPSSuccess, onGPSError, {
-      enableHighAccuracy: true, timeout: 30000, maximumAge: 0
-    });
-  }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 10000 });
+    setGpsStatus('partial', '⏳ Still trying...');
+    gpsWatcher = navigator.geolocation.watchPosition(onGPSSuccess, onGPSError, 
+      { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 });
+  }, { enableHighAccuracy: false, timeout: 8000 });
 
-  navigator.geolocation.getCurrentPosition(
-    pos => { if (!gpsReady || pos.coords.accuracy < (window._lastAcc || 9999)) onGPSSuccess(pos); },
-    () => {}, 
-    { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
-  );
+  navigator.geolocation.getCurrentPosition(pos => {
+    if (!gpsReady || pos.coords.accuracy < (window._lastAcc || 9999)) onGPSSuccess(pos);
+  }, () => {}, { enableHighAccuracy: true, timeout: 20000 });
 }
 
 function onGPSSuccess(pos) {
@@ -368,47 +364,31 @@ function onGPSSuccess(pos) {
   userLat = pos.coords.latitude;
   userLng = pos.coords.longitude;
   gpsReady = true;
-  setGpsStatus('ok', `✅ Location ready — accuracy ±${Math.round(pos.coords.accuracy)}m`);
+  setGpsStatus('ok', `✅ Location ready (±${Math.round(pos.coords.accuracy)}m)`);
 }
 
 function onGPSError(err) {
-  const msgs = { 1: '🔒 Location permission denied', 2: '📴 GPS is turned off', 3: '⏱ Location timed out' };
-  const tips = {
-    1: ['Tap "Allow" when prompted.', 'Check browser/site settings → Location → Allow'],
-    2: ['Turn on GPS/Location in your phone settings'],
-    3: ['Move closer to a window or outdoors and try again']
-  };
-  setGpsStatus('fail', msgs[err.code] || '⚠️ Location error', tips[err.code] || []);
+  const msgs = {1:'🔒 Permission denied', 2:'📴 GPS turned off', 3:'⏱ Timed out'};
+  setGpsStatus('fail', msgs[err.code] || 'Location error');
 }
 
 function retryGPS() {
   gpsReady = false;
-  window._lastAcc = 9999;
   requestGPS();
 }
 
-function setGpsStatus(type, msg, steps = []) {
+function setGpsStatus(type, msg) {
   const block = document.getElementById('gps-block');
   block.className = `gps-block ${type}`;
   document.getElementById('gps-msg').textContent = msg;
-
-  const stepsEl = document.getElementById('gps-steps');
-  const actionsEl = document.getElementById('gps-actions');
-
-  if (steps.length) {
-    stepsEl.innerHTML = steps.map(s => `<li>${s}</li>`).join('');
-    stepsEl.classList.add('visible');
-    actionsEl.classList.add('visible');
-  } else {
-    stepsEl.classList.remove('visible');
-    actionsEl.classList.toggle('visible', type === 'fail' || type === 'partial');
-  }
+  document.getElementById('gps-steps').classList.toggle('visible', false);
+  document.getElementById('gps-actions').classList.toggle('visible', type === 'fail' || type === 'partial');
 }
 
 // ====================== SELFIE ======================
 async function startCamera() {
   try {
-    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
     const video = document.getElementById('selfie-video');
     video.srcObject = cameraStream;
     video.classList.add('visible');
@@ -416,7 +396,7 @@ async function startCamera() {
     document.getElementById('selfie-camera').style.display = 'block';
     document.getElementById('selfie-block').classList.add('active');
   } catch(e) {
-    showAlert(document.getElementById('login-alert'), '📷 Camera access denied. Please allow camera permission.');
+    showAlert(document.getElementById('login-alert'), 'Camera access denied. Please allow permission.');
   }
 }
 
@@ -426,11 +406,10 @@ function capturePhoto() {
   canvas.width = video.videoWidth || 320;
   canvas.height = video.videoHeight || 240;
   canvas.getContext('2d').drawImage(video, 0, 0);
-
   selfieDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+
   document.getElementById('selfie-preview').src = selfieDataUrl;
   document.getElementById('selfie-preview').classList.add('visible');
-
   document.getElementById('selfie-video').classList.remove('visible');
   document.getElementById('selfie-camera').style.display = 'none';
   document.getElementById('selfie-confirm').style.display = 'block';
@@ -463,7 +442,7 @@ function cancelCamera() {
 
 function stopCamera() {
   if (cameraStream) {
-    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream.getTracks().forEach(t => t.stop());
     cameraStream = null;
   }
 }
@@ -481,17 +460,20 @@ async function post(action, payload = {}) {
 
 // ====================== LOGIN ======================
 async function handleLogin() {
-  document.getElementById('override-field').classList.remove('visible');
   const id = document.getElementById('student-id').value.trim().toUpperCase();
   const name = document.getElementById('student-name').value.trim();
   const code = document.getElementById('session-code').value.trim();
   const overrideCode = document.getElementById('override-code').value.trim() || null;
 
   const alertEl = document.getElementById('login-alert');
-  const btn = document.getElementById('login-btn');
+  const deviceBlockedEl = document.getElementById('device-blocked');
+  const overrideField = document.getElementById('override-field');
 
   alertEl.classList.remove('visible');
-  ['student-id', 'student-name', 'session-code', 'override-code'].forEach(f => {
+  deviceBlockedEl.classList.remove('visible');
+  overrideField.classList.remove('visible');
+
+  ['student-id','student-name','session-code','override-code'].forEach(f => {
     const el = document.getElementById(f);
     if (el) el.classList.remove('error');
   });
@@ -502,15 +484,24 @@ async function handleLogin() {
     return showAlert(alertEl, 'Session code must be exactly 6 digits.');
   }
   if (!selfieConfirmed) return showAlert(alertEl, '📷 Please take a selfie before continuing.');
-  if (!gpsReady) return showAlert(alertEl, '⏳ Location not ready yet. Please wait or tap "Try Again".');
+  if (!gpsReady) return showAlert(alertEl, '⏳ Location not ready yet.');
 
+  const btn = document.getElementById('login-btn');
   btn.disabled = true;
   btn.textContent = 'Verifying…';
+
   let loginSuccess = false;
 
   try {
     const fingerprint = await getFingerprint();
-    const payload = { id, name, code, lat: userLat, lng: userLng, fingerprint, selfie: selfieDataUrl };
+
+    const payload = { 
+      id, name, code, 
+      lat: userLat, 
+      lng: userLng, 
+      fingerprint, 
+      selfie: selfieDataUrl 
+    };
     if (overrideCode) payload.overrideCode = overrideCode;
 
     const d = await post('login', payload);
@@ -522,25 +513,32 @@ async function handleLogin() {
       showPage('page-loading');
       await loadQuestions();
     } else {
-      const errorMap = {
-        id_not_found: ['student-id', 'This Student ID is not registered.'],
-        name_mismatch: ['student-name', 'Name does not match this Student ID.'],
-        already_submitted: [null, 'You have already submitted this quiz.'],
-        device_locked: [null, '⚠️ This Student ID was used on a different device. Ask your lecturer for an override code.'],
-        override_invalid: ['override-code', 'Invalid override code.'],
-        override_used: ['override-code', 'This override code has already been used.'],
-        override_expired: ['override-code', 'Override code has expired.'],
-        invalid_code: ['session-code', 'Invalid session code.'],
-        session_expired: ['session-code', 'Session code has expired.'],
-        location_fail: [null, `❌ You are outside the classroom (${d.distance || '?'}m away).`],
-        dept_mismatch: [null, 'This session is not open for your department.'],
-      };
-
-      const [field, msg] = errorMap[d.error] || [null, 'Login failed: unknown error'];
-      if (field) document.getElementById(field).classList.add('error');
-      if (d.error === 'device_locked') document.getElementById('override-field').classList.add('visible');
-
-      showAlert(alertEl, msg);
+      if (d.error === 'device_in_use' || d.error === 'device_locked') {
+        deviceBlockedEl.classList.add('visible');
+        showAlert(alertEl, 'This device is already registered to another student today.');
+        if (d.error === 'device_locked') overrideField.classList.add('visible');
+      } 
+      else if (d.error === 'id_not_found') {
+        document.getElementById('student-id').classList.add('error');
+        showAlert(alertEl, 'This Student ID is not registered.');
+      }
+      else if (d.error === 'name_mismatch') {
+        document.getElementById('student-name').classList.add('error');
+        showAlert(alertEl, 'Name does not match this Student ID.');
+      }
+      else if (d.error === 'already_submitted') {
+        showAlert(alertEl, 'You have already submitted this quiz.');
+      }
+      else if (d.error === 'invalid_code' || d.error === 'session_expired') {
+        document.getElementById('session-code').classList.add('error');
+        showAlert(alertEl, 'Invalid or expired session code.');
+      }
+      else if (d.error === 'location_fail') {
+        showAlert(alertEl, `❌ You are outside the classroom (${d.distance || '?'}m away).`);
+      }
+      else {
+        showAlert(alertEl, d.message || 'Login failed. Please try again.');
+      }
     }
   } catch(e) {
     showAlert(alertEl, 'Connection error: ' + e.message);
@@ -557,9 +555,7 @@ async function loadQuestions() {
   try {
     const d = await post('questions', { id: currentUser.id });
     if (!d.ok) {
-      document.getElementById('loading-msg').textContent = d.error === 'already_submitted' 
-        ? 'You have already submitted this quiz.' 
-        : 'Error loading questions.';
+      document.getElementById('loading-msg').textContent = 'Error loading quiz.';
       return;
     }
     quizQuestions = d.questions;
@@ -584,23 +580,21 @@ function renderQuiz() {
     card.innerHTML = `
       <div class="question-number">Question ${i+1} of ${quizQuestions.length}</div>
       <div class="question-text">${q.text} <span class="req">*</span></div>
-      ${q.options.map((opt, idx) => `
+      ${q.options.map((o, idx) => `
         <label class="option">
           <input type="radio" name="${q.id}" value="${idx}" onchange="onAnswer('${q.id}', ${idx})">
           <div class="radio-circle"><div class="radio-dot"></div></div>
-          <span class="option-label">${opt}</span>
-        </label>
-      `).join('')}
-      <div class="question-error" id="err-${q.id}">This question is required.</div>`;
+          <span class="option-label">${o}</span>
+        </label>`).join('')}
+      <div class="question-error" id="err-${q.id}">This is a required question.</div>`;
     container.appendChild(card);
   });
-
   updateProgress();
 }
 
 function onAnswer(qid, val) {
   answers[qid] = val;
-  document.getElementById(`err-${qid}`).classList.remove('visible');
+  document.getElementById(`err-${q.id}`).classList.remove('visible');
   updateProgress();
 }
 
@@ -621,20 +615,19 @@ function clearForm() {
 
 async function handleSubmit() {
   if (submitted) return;
-
   const alertEl = document.getElementById('submit-alert');
   alertEl.classList.remove('visible');
 
-  let allAnswered = true;
+  let allOk = true;
   quizQuestions.forEach(q => {
     if (answers[q.id] === undefined) {
       document.getElementById(`err-${q.id}`).classList.add('visible');
-      allAnswered = false;
+      allOk = false;
     }
   });
 
-  if (!allAnswered) {
-    showAlert(alertEl, 'Please answer all questions before submitting.');
+  if (!allOk) {
+    showAlert(alertEl, 'Please answer all questions.');
     return;
   }
 
@@ -648,7 +641,7 @@ async function handleSubmit() {
       submitted = true;
       showResults(d);
     } else {
-      showAlert(alertEl, d.error === 'already_submitted' ? 'You have already submitted this quiz.' : 'Submission failed.');
+      showAlert(alertEl, d.error === 'already_submitted' ? 'Already submitted.' : 'Submission failed.');
       btn.disabled = false;
       btn.textContent = 'Submit';
     }
@@ -664,7 +657,7 @@ function showResults(data) {
   const pct = Math.round(score / total * 100);
   const pass = pct >= 60;
 
-  const reviewHTML = quizQuestions.map((q, i) => {
+  const review = quizQuestions.map((q, i) => {
     const g = gradedAnswers[q.id];
     return `
       <div class="review-item ${g.isCorrect ? 'correct' : 'wrong'}">
@@ -678,18 +671,15 @@ function showResults(data) {
   document.getElementById('result-content').innerHTML = `
     <div class="result-icon ${pass ? 'pass' : 'fail'}">${pass ? '🎉' : '📝'}</div>
     <div class="result-title">${pass ? 'Well done!' : 'Keep practising!'}</div>
-    <div style="font-size:13px;color:var(--gray-5);margin-bottom:4px">
-      <strong>${currentUser.name}</strong> · ${currentUser.id} · ${currentUser.dept}
-    </div>
+    <div style="font-size:13px;color:var(--gray-5);margin-bottom:4px"><strong>${currentUser.name}</strong> · ${currentUser.id}</div>
     <div class="result-score">${score}/${total}</div>
     <div class="result-meta">
       You scored <strong>${pct}%</strong> — ${score} of ${total} correct.<br>
-      ${pass ? 'Congratulations, you passed!' : 'Passing score is 60%.'}<br>
-      <span style="color:var(--green);font-size:12px">✓ Attendance, photo &amp; responses saved.</span>
+      ${pass ? 'Congratulations, you passed!' : 'Passing score is 60%.'}
     </div>
     <div class="answer-review">
       <div class="review-heading">Answer Review</div>
-      ${reviewHTML}
+      ${review}
     </div>`;
 
   showPage('page-result');
@@ -707,14 +697,11 @@ function showAlert(el, msg) {
   el.classList.add('visible');
 }
 
-// Keyboard support
 document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('page-login').classList.contains('active')) {
-    handleLogin();
-  }
+  if (e.key === 'Enter' && document.getElementById('page-login').classList.contains('active')) handleLogin();
 });
 
-// Initialize
+// Start GPS
 initGPS();
 </script>
 </body>
