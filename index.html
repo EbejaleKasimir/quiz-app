@@ -739,6 +739,7 @@ let gpsAttempt = 0;
 
 // ====================== DEVICE FINGERPRINT ======================
 async function getFingerprint() {
+  // Collect device/browser characteristics
   const components = [
     navigator.userAgent,
     navigator.language,
@@ -750,29 +751,24 @@ async function getFingerprint() {
     new Date().getTimezoneOffset()
   ].join('|');
 
-  // Try secure crypto first
-  if (window.crypto && window.crypto.subtle) {
-    try {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(components);
-      const hash = await crypto.subtle.digest('SHA-256', data);
-      return Array.from(new Uint8Array(hash))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('')
-        .slice(0, 48);
-    } catch (e) {
-      console.warn('crypto.subtle failed, falling back', e);
+  // Simple but stable hash function (works everywhere)
+  function simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash |= 0; // convert to 32-bit integer
     }
+    return Math.abs(hash).toString(16).padStart(8, '0');
   }
 
-  // Fallback: simple hash (not cryptographically strong, but sufficient for device fingerprint)
-  let hash = 0;
-  for (let i = 0; i < components.length; i++) {
-    const char = components.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash |= 0;
-  }
-  return Math.abs(hash).toString(16).padStart(8, '0').repeat(6).slice(0, 48);
+  // Use simple hash (no crypto.subtle needed)
+  let fingerprint = simpleHash(components);
+  // Make it longer for better uniqueness
+  while (fingerprint.length < 48) fingerprint += fingerprint;
+  fingerprint = fingerprint.slice(0, 48);
+  
+  return fingerprint;
 }
  
  
