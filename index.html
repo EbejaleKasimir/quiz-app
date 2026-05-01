@@ -14,7 +14,6 @@
     --text:#202124;
   }
   body { font-family:'Roboto',sans-serif; background:#f0ebf8; min-height:100vh; color:var(--text); }
-
   .header { background:white; border-bottom:1px solid var(--gray-3); padding:0 24px; height:64px; display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:100; box-shadow:0 1px 2px rgba(0,0,0,.1); }
   .header-icon { width:32px; height:32px; background:var(--purple); border-radius:4px; display:flex; align-items:center; justify-content:center; }
   .header-title { font-family:'Google Sans',sans-serif; font-size:22px; color:var(--gray-5); font-weight:400; }
@@ -35,29 +34,59 @@
   .field-group { margin-bottom:20px; }
   .field-label { display:block; font-size:14px; color:var(--gray-6); margin-bottom:8px; font-weight:500; }
   .field-label .req { color:var(--red); margin-left:2px; }
+
   .text-input { width:100%; border:1px solid var(--gray-3); border-radius:4px; padding:10px 12px; font-size:14px; font-family:'Roboto',sans-serif; color:var(--text); outline:none; transition:border-color .15s; }
   .text-input:focus { border-color:var(--purple); border-width:2px; }
   .text-input.error { border-color:var(--red); border-width:2px; }
   .code-input { font-size:22px; font-weight:500; letter-spacing:6px; text-align:center; font-family:'Google Sans',sans-serif; }
 
   .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 24px; border-radius:4px; border:none; font-family:'Google Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:background .15s; }
-  .btn-primary { background:var(--purple); color:white; }
-  .btn-primary:hover:not(:disabled) { background:#5e35b1; }
-  .btn-primary:disabled { background:var(--gray-3); color:var(--gray-4); cursor:not-allowed; }
-  .btn-submit { background:var(--purple); color:white; }
-  .btn-submit:hover:not(:disabled) { background:#5e35b1; }
-  .btn-submit:disabled { background:var(--gray-3); color:var(--gray-4); cursor:not-allowed; }
+  .btn-primary, .btn-submit { background:var(--purple); color:white; }
+  .btn-primary:hover:not(:disabled), .btn-submit:hover:not(:disabled) { background:#5e35b1; }
+  .btn-primary:disabled, .btn-submit:disabled { background:var(--gray-3); color:var(--gray-4); cursor:not-allowed; }
 
-  /* GPS status pill */
-  .gps-status { display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:6px; font-size:13px; margin-bottom:20px; }
-  .gps-status.detecting { background:#fff8e1; color:var(--orange); border:1px solid #ffe082; }
-  .gps-status.ok        { background:#e6f4ea; color:var(--green); border:1px solid #a8d5b5; }
-  .gps-status.fail      { background:#fce8e6; color:var(--red);   border:1px solid #ef9a9a; }
-  .gps-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-  .gps-status.detecting .gps-dot { background:var(--orange); animation:pulse 1s infinite; }
-  .gps-status.ok .gps-dot        { background:var(--green); }
-  .gps-status.fail .gps-dot      { background:var(--red); }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  /* GPS Block */
+  .gps-block { border-radius:8px; font-size:13px; margin-bottom:20px; overflow:hidden; border:1px solid; }
+  .gps-block.detecting { background:#fff8e1; border-color:#ffe082; color:var(--orange); }
+  .gps-block.ok { background:#e6f4ea; border-color:#a8d5b5; color:#1b5e20; }
+  .gps-block.fail { background:#fce8e6; border-color:#ef9a9a; color:#b71c1c; }
+  .gps-block.partial { background:#e8f0fe; border-color:#aecbfa; color:#1557b0; }
+  .gps-top { display:flex; align-items:center; gap:10px; padding:12px 14px; }
+  .gps-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .gps-block.detecting .gps-dot { background:var(--orange); animation:pulse 1.2s infinite; }
+  .gps-block.ok .gps-dot { background:var(--green); }
+  .gps-block.fail .gps-dot { background:var(--red); }
+  .gps-block.partial .gps-dot { background:#1a73e8; animation:pulse 1.2s infinite; }
+  .gps-msg { flex:1; font-weight:500; line-height:1.4; }
+  .gps-steps { padding:0 14px 12px 33px; font-size:12px; line-height:1.8; display:none; }
+  .gps-steps.visible { display:block; }
+  .gps-actions { padding:0 14px 12px 33px; display:none; gap:8px; }
+  .gps-actions.visible { display:flex; }
+  .gps-retry-btn { background:white; border:1px solid currentColor; border-radius:4px; padding:6px 14px; font-size:12px; font-family:'Google Sans',sans-serif; font-weight:500; cursor:pointer; color:inherit; }
+
+  /* Selfie */
+  .selfie-block { border:2px dashed var(--gray-3); border-radius:12px; padding:20px; text-align:center; margin-bottom:20px; background:var(--gray-1); transition:border-color .2s; }
+  .selfie-block.active { border-color:var(--purple); background:#EDE7F6; }
+  .selfie-block.done { border-color:var(--green); border-style:solid; background:#e6f4ea; }
+  .selfie-preview { width:120px; height:120px; border-radius:50%; object-fit:cover; border:3px solid var(--purple); margin:0 auto 12px; display:none; }
+  .selfie-preview.visible { display:block; }
+  video#selfie-video { width:100%; max-width:320px; height:240px; border-radius:8px; object-fit:cover; display:none; background:#000; }
+  video#selfie-video.visible { display:block; margin:0 auto 12px; }
+  canvas#selfie-canvas { display:none; }
+  .selfie-icon { font-size:48px; margin-bottom:8px; }
+  .selfie-label { font-size:14px; color:var(--gray-5); margin-bottom:12px; line-height:1.4; }
+  .selfie-label strong { color:var(--text); display:block; font-size:15px; margin-bottom:4px; }
+  .selfie-btn { background:var(--purple); color:white; border:none; border-radius:4px; padding:10px 20px; font-family:'Google Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+  .selfie-btn:hover { background:#5e35b1; }
+  .selfie-btn.secondary { background:white; color:var(--purple); border:1px solid var(--purple); }
+  .selfie-status { font-size:13px; color:var(--green); font-weight:500; margin-top:8px; display:none; }
+  .selfie-status.visible { display:block; }
+
+  /* Override Field */
+  .override-field { background:#fff8e1; border:1px solid #ffe082; border-radius:8px; padding:16px; margin-bottom:16px; display:none; }
+  .override-field.visible { display:block; }
+  .override-field-title { font-size:13px; font-weight:500; color:#7a5800; margin-bottom:4px; }
+  .override-field-desc { font-size:12px; color:#9a6f00; margin-bottom:12px; line-height:1.5; }
 
   .progress-bar { background:var(--gray-2); height:4px; border-radius:2px; margin-top:16px; overflow:hidden; }
   .progress-fill { height:100%; background:var(--purple); border-radius:2px; transition:width .4s ease; width:0%; }
@@ -75,6 +104,7 @@
   .option:has(input:checked) .radio-circle { border-color:var(--purple); }
   .option:has(input:checked) .radio-dot { transform:scale(1); }
   .option-label { font-size:14px; color:var(--text); }
+
   .question-error { font-size:12px; color:var(--red); margin-top:8px; display:none; }
   .question-error.visible { display:block; }
 
@@ -84,13 +114,13 @@
 
   .spinner { width:36px; height:36px; border:3px solid var(--gray-2); border-top-color:var(--purple); border-radius:50%; animation:spin .7s linear infinite; margin:0 auto 16px; }
   @keyframes spin { to{transform:rotate(360deg)} }
+
   .loading-card { padding:48px 24px; text-align:center; }
   .loading-card p { color:var(--gray-5); font-size:14px; margin-top:8px; }
 
   .alert { padding:12px 16px; border-radius:6px; font-size:13px; margin-bottom:16px; display:none; line-height:1.5; }
   .alert.visible { display:block; }
   .alert-error { background:#fce8e6; color:#c62828; border:1px solid #ef9a9a; }
-  .alert-warn  { background:#fff8e1; color:#b06000; border:1px solid #ffe082; }
 
   .result-card { padding:48px 24px; text-align:center; }
   .result-icon { width:72px; height:72px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 24px; font-size:36px; }
@@ -99,6 +129,7 @@
   .result-title { font-family:'Google Sans',sans-serif; font-size:24px; font-weight:400; margin-bottom:8px; }
   .result-score { font-size:48px; font-weight:300; color:var(--purple); font-family:'Google Sans',sans-serif; margin:16px 0; }
   .result-meta { font-size:14px; color:var(--gray-5); margin-bottom:24px; line-height:1.6; }
+
   .answer-review { text-align:left; margin-top:24px; border-top:1px solid var(--gray-3); padding-top:24px; }
   .review-heading { font-family:'Google Sans',sans-serif; font-size:15px; font-weight:500; margin-bottom:16px; }
   .review-item { margin-bottom:12px; padding:12px; border-radius:8px; }
@@ -110,18 +141,11 @@
   .review-item.correct .review-status { color:var(--green); }
   .review-item.wrong .review-status { color:var(--red); }
 
-  .setup-banner { background:#e8f0fe; border:1px solid #aecbfa; border-radius:8px; padding:14px 16px; font-size:13px; color:#1a73e8; margin-bottom:20px; line-height:1.6; }
-  .setup-banner strong { display:block; font-size:14px; margin-bottom:6px; color:#1557b0; }
-  .url-row { display:flex; gap:8px; margin-top:6px; }
-  .url-row .text-input { flex:1; font-size:13px; }
-  .url-row .btn { padding:8px 14px; font-size:13px; white-space:nowrap; }
-  .url-saved { color:var(--green); font-size:12px; margin-top:6px; display:none; }
-
   .page { display:none; }
   .page.active { display:block; animation:fadeIn .3s ease; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-
   .divider { border:none; border-top:1px solid var(--gray-3); margin:20px 0; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
 </style>
 </head>
 <body>
@@ -134,26 +158,30 @@
 </div>
 
 <div class="main">
-
-  <!-- LOGIN -->
+  <!-- LOGIN PAGE -->
   <div class="page active" id="page-login">
     <div class="card banner-card">
       <div class="banner-content">
         <div class="form-title">Class Quiz</div>
-        <div class="form-desc">Sign in with your Student ID, name, and today's session code shown on the board. Your location is verified to confirm physical attendance.</div>
+        <div class="form-desc">Sign in with your Student ID, name, and today's session code. Location and identity will be verified.</div>
         <div class="required-note">* Required</div>
       </div>
     </div>
 
     <div class="card section">
-
       <h2>Sign In to Continue</h2>
       <p>All fields are required. Your location will be checked automatically.</p>
 
-      <!-- GPS status -->
-      <div class="gps-status detecting" id="gps-status">
-        <div class="gps-dot"></div>
-        <span id="gps-msg">Detecting your location… please wait</span>
+      <!-- GPS -->
+      <div class="gps-block detecting" id="gps-block">
+        <div class="gps-top">
+          <div class="gps-dot"></div>
+          <div class="gps-msg" id="gps-msg">Detecting your location… please wait</div>
+        </div>
+        <ol class="gps-steps" id="gps-steps"></ol>
+        <div class="gps-actions" id="gps-actions">
+          <button class="gps-retry-btn" onclick="retryGPS()">↻ Try Again</button>
+        </div>
       </div>
 
       <div class="alert alert-error" id="login-alert"></div>
@@ -162,14 +190,64 @@
         <label class="field-label" for="student-id">Student ID <span class="req">*</span></label>
         <input class="text-input" type="text" id="student-id" placeholder="e.g. STU001" autocomplete="off">
       </div>
+
       <div class="field-group">
         <label class="field-label" for="student-name">Full Name <span class="req">*</span></label>
         <input class="text-input" type="text" id="student-name" placeholder="Your registered full name">
       </div>
+
       <div class="field-group">
         <label class="field-label" for="session-code">Session Code <span class="req">*</span></label>
         <input class="text-input code-input" type="text" id="session-code" placeholder="000000" maxlength="6" autocomplete="off" inputmode="numeric">
-        <div style="font-size:12px;color:var(--gray-4);margin-top:6px">Enter the 6-digit code shown on the board by your lecturer</div>
+        <div style="font-size:12px;color:var(--gray-4);margin-top:6px">Enter the 6-digit code shown on the board</div>
+      </div>
+
+      <!-- Selfie -->
+      <div class="field-group">
+        <label class="field-label">Identity Selfie <span class="req">*</span></label>
+        <div class="selfie-block" id="selfie-block">
+          <img id="selfie-preview" class="selfie-preview" alt="Your selfie">
+          <video id="selfie-video" autoplay playsinline></video>
+          <canvas id="selfie-canvas" width="320" height="240"></canvas>
+
+          <div id="selfie-idle">
+            <div class="selfie-icon">📷</div>
+            <div class="selfie-label">
+              <strong>Take a selfie to verify your identity</strong>
+              Your photo is saved for lecturer review.
+            </div>
+            <button class="selfie-btn" onclick="startCamera()">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="white"><path d="M12 15.2A3.2 3.2 0 0 1 8.8 12 3.2 3.2 0 0 1 12 8.8 3.2 3.2 0 0 1 15.2 12 3.2 3.2 0 0 1 12 15.2M20 4h-3.17L15 2H9L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/></svg>
+              Open Camera
+            </button>
+          </div>
+
+          <div id="selfie-camera" style="display:none">
+            <div style="margin-bottom:10px;font-size:13px;color:var(--gray-5)">Position your face in the centre, then tap Capture</div>
+            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+              <button class="selfie-btn" onclick="capturePhoto()">📸 Capture</button>
+              <button class="selfie-btn secondary" onclick="cancelCamera()">Cancel</button>
+            </div>
+          </div>
+
+          <div id="selfie-confirm" style="display:none">
+            <div style="font-size:13px;color:var(--gray-5);margin-bottom:10px">Looking good? Confirm or retake.</div>
+            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+              <button class="selfie-btn" onclick="confirmPhoto()">✓ Use this photo</button>
+              <button class="selfie-btn secondary" onclick="retakePhoto()">↻ Retake</button>
+            </div>
+          </div>
+
+          <div class="selfie-status" id="selfie-status">✅ Photo captured — identity verified</div>
+        </div>
+      </div>
+
+      <!-- Override Field -->
+      <div class="override-field" id="override-field">
+        <div class="override-field-title">🔓 Device Override Required</div>
+        <div class="override-field-desc">Your Student ID was used on a different device today. Ask your lecturer for a one-time override code.</div>
+        <label class="field-label" for="override-code">Override Code <span class="req">*</span></label>
+        <input class="text-input code-input" type="text" id="override-code" placeholder="000000" maxlength="6" autocomplete="off" inputmode="numeric">
       </div>
 
       <button class="btn btn-primary" id="login-btn" onclick="handleLogin()" style="width:100%;justify-content:center;">
@@ -179,7 +257,7 @@
     </div>
   </div>
 
-  <!-- LOADING -->
+  <!-- LOADING PAGE -->
   <div class="page" id="page-loading">
     <div class="card banner-card"><div class="banner-content"><div class="form-title">Class Quiz</div></div></div>
     <div class="card loading-card">
@@ -188,7 +266,7 @@
     </div>
   </div>
 
-  <!-- QUIZ -->
+  <!-- QUIZ PAGE -->
   <div class="page" id="page-quiz">
     <div class="card banner-card">
       <div class="banner-content">
@@ -207,31 +285,32 @@
     </div>
   </div>
 
-  <!-- RESULT -->
+  <!-- RESULT PAGE -->
   <div class="page" id="page-result">
     <div class="card banner-card"><div class="banner-content"><div class="form-title">Your Results</div></div></div>
     <div class="card"><div class="result-card" id="result-content"></div></div>
   </div>
-
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbygockGlXUENHQfTNzTo2SlH9J_iaclpwyRl4vOxNTYgH1tOGfLKHGI1Gi4ThWk410F9g/exec";
+// ====================== CONFIG ======================
+const API_URL = "https://script.google.com/macros/s/AKfycbxpWTd_FpmTwGDx-6u0C6VCeSfyarweHuBTSu8Ho-wtHEZg6QK3bpnvqgBDxk_Xd0lgMg/exec";
 
-// ── State ─────────────────────────────────────────────────────
+// ====================== STATE ======================
 let currentUser = null;
 let quizQuestions = [];
 let answers = {};
 let submitted = false;
-let userLat = null, userLng = null, gpsReady = false;
-let selfieDataUrl = null, selfieConfirmed = false, cameraStream = null;
-let gpsWatcher = null, gpsAttempt = 0;
+let userLat = null;
+let userLng = null;
+let gpsReady = false;
+let selfieDataUrl = null;
+let selfieConfirmed = false;
+let cameraStream = null;
+let gpsWatcher = null;
+let gpsAttempt = 0;
 
-// ── Device Fingerprint ────────────────────────────────────────
-// Generates a stable hash of device characteristics.
-// Two different phones will produce different hashes,
-// so if Student A's ID is already registered to Phone 1,
-// Phone 2 will get "device_locked" even with valid credentials.
+// ====================== DEVICE FINGERPRINT ======================
 async function getFingerprint() {
   const raw = [
     navigator.userAgent,
@@ -243,7 +322,8 @@ async function getFingerprint() {
     navigator.platform || '',
     window.innerWidth + 'x' + window.innerHeight
   ].join('|');
-  const buf  = new TextEncoder().encode(raw);
+
+  const buf = new TextEncoder().encode(raw);
   const hash = await crypto.subtle.digest('SHA-256', buf);
   return Array.from(new Uint8Array(hash))
     .map(b => b.toString(16).padStart(2, '0'))
@@ -251,10 +331,10 @@ async function getFingerprint() {
     .slice(0, 40);
 }
 
-// ── GPS ───────────────────────────────────────────────────────
+// ====================== GPS ======================
 function initGPS() {
   if (!navigator.geolocation) {
-    setGpsStatus('fail', '📵 GPS not supported on this browser', ['Try Chrome or Safari on your phone.']);
+    setGpsStatus('fail', '📵 GPS not supported on this browser');
     return;
   }
   requestGPS();
@@ -263,22 +343,22 @@ function initGPS() {
 function requestGPS() {
   gpsAttempt++;
   setGpsStatus('detecting', `📡 Detecting your location… (attempt ${gpsAttempt})`);
-  if (gpsWatcher) { navigator.geolocation.clearWatch(gpsWatcher); gpsWatcher = null; }
 
-  // Fast low-accuracy first (works indoors via WiFi/cell)
-  navigator.geolocation.getCurrentPosition(onGPSSuccess, err => {
+  if (gpsWatcher) {
+    navigator.geolocation.clearWatch(gpsWatcher);
+    gpsWatcher = null;
+  }
+
+  navigator.geolocation.getCurrentPosition(onGPSSuccess, () => {
     setGpsStatus('partial', '⏳ GPS taking longer, still trying…');
-    gpsWatcher = navigator.geolocation.watchPosition(
-      pos => { navigator.geolocation.clearWatch(gpsWatcher); gpsWatcher = null; onGPSSuccess(pos); },
-      onGPSError,
-      { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
-    );
+    gpsWatcher = navigator.geolocation.watchPosition(onGPSSuccess, onGPSError, {
+      enableHighAccuracy: true, timeout: 30000, maximumAge: 0
+    });
   }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 10000 });
 
-  // Simultaneously try high-accuracy — upgrades if it arrives
   navigator.geolocation.getCurrentPosition(
     pos => { if (!gpsReady || pos.coords.accuracy < (window._lastAcc || 9999)) onGPSSuccess(pos); },
-    () => {},
+    () => {}, 
     { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
   );
 }
@@ -292,58 +372,65 @@ function onGPSSuccess(pos) {
 }
 
 function onGPSError(err) {
-  const tips = {
-    1: ['When asked "Allow location?", tap Allow.', 'If denied: phone Settings → Chrome → Location → Allow.', 'Then tap ↻ Try Again.'],
-    2: ['Turn on Location/GPS in phone Settings.', 'Move near a window then tap ↻ Try Again.'],
-    3: ['GPS slow indoors — tap ↻ Try Again.', 'Move near a window if it keeps failing.']
-  };
   const msgs = { 1: '🔒 Location permission denied', 2: '📴 GPS is turned off', 3: '⏱ Location timed out' };
-  setGpsStatus('fail', msgs[err.code] || '⚠️ Location error', tips[err.code] || ['Tap ↻ Try Again.']);
+  const tips = {
+    1: ['Tap "Allow" when prompted.', 'Check browser/site settings → Location → Allow'],
+    2: ['Turn on GPS/Location in your phone settings'],
+    3: ['Move closer to a window or outdoors and try again']
+  };
+  setGpsStatus('fail', msgs[err.code] || '⚠️ Location error', tips[err.code] || []);
 }
 
-function retryGPS() { gpsReady = false; window._lastAcc = 9999; requestGPS(); }
+function retryGPS() {
+  gpsReady = false;
+  window._lastAcc = 9999;
+  requestGPS();
+}
 
 function setGpsStatus(type, msg, steps = []) {
   const block = document.getElementById('gps-block');
-  if (!block) return;
   block.className = `gps-block ${type}`;
   document.getElementById('gps-msg').textContent = msg;
+
   const stepsEl = document.getElementById('gps-steps');
-  const actEl   = document.getElementById('gps-actions');
+  const actionsEl = document.getElementById('gps-actions');
+
   if (steps.length) {
     stepsEl.innerHTML = steps.map(s => `<li>${s}</li>`).join('');
     stepsEl.classList.add('visible');
-    actEl.classList.add('visible');
+    actionsEl.classList.add('visible');
   } else {
     stepsEl.classList.remove('visible');
-    (type === 'fail' || type === 'partial') ? actEl.classList.add('visible') : actEl.classList.remove('visible');
+    actionsEl.classList.toggle('visible', type === 'fail' || type === 'partial');
   }
 }
 
-// ── Camera / Selfie ───────────────────────────────────────────
+// ====================== SELFIE ======================
 async function startCamera() {
   try {
     cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
-    document.getElementById('selfie-video').srcObject = cameraStream;
-    document.getElementById('selfie-video').classList.add('visible');
+    const video = document.getElementById('selfie-video');
+    video.srcObject = cameraStream;
+    video.classList.add('visible');
     document.getElementById('selfie-idle').style.display = 'none';
     document.getElementById('selfie-camera').style.display = 'block';
     document.getElementById('selfie-block').classList.add('active');
   } catch(e) {
-    showAlert(document.getElementById('login-alert'), '📷 Camera access denied. Please allow camera permission in browser settings.');
+    showAlert(document.getElementById('login-alert'), '📷 Camera access denied. Please allow camera permission.');
   }
 }
 
 function capturePhoto() {
-  const video  = document.getElementById('selfie-video');
+  const video = document.getElementById('selfie-video');
   const canvas = document.getElementById('selfie-canvas');
-  canvas.width  = video.videoWidth  || 320;
+  canvas.width = video.videoWidth || 320;
   canvas.height = video.videoHeight || 240;
-  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  canvas.getContext('2d').drawImage(video, 0, 0);
+
   selfieDataUrl = canvas.toDataURL('image/jpeg', 0.75);
-  const preview = document.getElementById('selfie-preview');
-  preview.src = selfieDataUrl;
-  preview.classList.add('visible');
+  document.getElementById('selfie-preview').src = selfieDataUrl;
+  document.getElementById('selfie-preview').classList.add('visible');
+
   document.getElementById('selfie-video').classList.remove('visible');
   document.getElementById('selfie-camera').style.display = 'none';
   document.getElementById('selfie-confirm').style.display = 'block';
@@ -354,12 +441,12 @@ function confirmPhoto() {
   stopCamera();
   document.getElementById('selfie-confirm').style.display = 'none';
   document.getElementById('selfie-status').classList.add('visible');
-  document.getElementById('selfie-block').classList.remove('active');
-  document.getElementById('selfie-block').classList.add('done');
+  document.getElementById('selfie-block').classList.remove('active').classList.add('done');
 }
 
 function retakePhoto() {
-  selfieDataUrl = null; selfieConfirmed = false;
+  selfieDataUrl = null;
+  selfieConfirmed = false;
   document.getElementById('selfie-preview').classList.remove('visible');
   document.getElementById('selfie-confirm').style.display = 'none';
   document.getElementById('selfie-video').classList.add('visible');
@@ -375,73 +462,58 @@ function cancelCamera() {
 }
 
 function stopCamera() {
-  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+  }
 }
 
-// ── API ───────────────────────────────────────────────────────
+// ====================== API ======================
 async function post(action, payload = {}) {
   const r = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({ action, ...payload })
   });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   return r.json();
 }
 
-// ── Page helper ───────────────────────────────────────────────
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-function showAlert(el, msg) { el.textContent = msg; el.classList.add('visible'); }
-
-// ── LOGIN ────────────────────────────────────────────────────
+// ====================== LOGIN ======================
 async function handleLogin() {
-  const id      = document.getElementById('student-id').value.trim().toUpperCase();
-  const name    = document.getElementById('student-name').value.trim();
-  const code    = document.getElementById('session-code').value.trim();
-  const overrideCode = document.getElementById('override-code') ? document.getElementById('override-code').value.trim() || null : null;
+  document.getElementById('override-field').classList.remove('visible');
+  const id = document.getElementById('student-id').value.trim().toUpperCase();
+  const name = document.getElementById('student-name').value.trim();
+  const code = document.getElementById('session-code').value.trim();
+  const overrideCode = document.getElementById('override-code').value.trim() || null;
+
   const alertEl = document.getElementById('login-alert');
-  const btn     = document.getElementById('login-btn');
+  const btn = document.getElementById('login-btn');
 
-  // Reset state
   alertEl.classList.remove('visible');
-  ['student-id','student-name','session-code'].forEach(f => document.getElementById(f).classList.remove('error'));
-  const ovEl = document.getElementById('override-code');
-  if (ovEl) ovEl.classList.remove('error');
+  ['student-id', 'student-name', 'session-code', 'override-code'].forEach(f => {
+    const el = document.getElementById(f);
+    if (el) el.classList.remove('error');
+  });
 
-  // Validate fields
-  if (!id || !name || !code) { showAlert(alertEl, "Please fill in all fields."); return; }
+  if (!id || !name || !code) return showAlert(alertEl, 'Please fill in all required fields.');
   if (code.length !== 6 || !/^\d+$/.test(code)) {
     document.getElementById('session-code').classList.add('error');
-    showAlert(alertEl, "Session code must be 6 digits."); return;
+    return showAlert(alertEl, 'Session code must be exactly 6 digits.');
   }
-  if (!selfieConfirmed) { showAlert(alertEl, "📷 Please take a selfie before continuing."); return; }
-  if (!gpsReady) { showAlert(alertEl, "⏳ Location not ready. Check the GPS box above and tap ↻ Try Again."); return; }
+  if (!selfieConfirmed) return showAlert(alertEl, '📷 Please take a selfie before continuing.');
+  if (!gpsReady) return showAlert(alertEl, '⏳ Location not ready yet. Please wait or tap "Try Again".');
 
   btn.disabled = true;
-  btn.textContent = "Verifying…";
-
+  btn.textContent = 'Verifying…';
   let loginSuccess = false;
 
   try {
-    // Generate device fingerprint
     const fingerprint = await getFingerprint();
-
-    const payload = {
-      id, name, code,
-      lat: userLat,
-      lng: userLng,
-      fingerprint,
-      selfie: selfieDataUrl
-    };
-
-    // Include override code only if entered
+    const payload = { id, name, code, lat: userLat, lng: userLng, fingerprint, selfie: selfieDataUrl };
     if (overrideCode) payload.overrideCode = overrideCode;
 
-    const d = await post("login", payload);
+    const d = await post('login', payload);
 
     if (d.ok) {
       loginSuccess = true;
@@ -450,115 +522,79 @@ async function handleLogin() {
       showPage('page-loading');
       await loadQuestions();
     } else {
-      // Handle all error cases
-      switch (d.error) {
-        case "id_not_found":
-          document.getElementById('student-id').classList.add('error');
-          showAlert(alertEl, "This Student ID is not registered.");
-          break;
-        case "name_mismatch":
-          document.getElementById('student-name').classList.add('error');
-          showAlert(alertEl, "Name does not match this Student ID.");
-          break;
-        case "already_submitted":
-          showAlert(alertEl, "You have already submitted this quiz. Only one submission is allowed.");
-          break;
-        case "device_locked":
-          // Reveal override field and focus it
-          const overrideField = document.getElementById('override-field');
-          if (overrideField) {
-            overrideField.classList.add('visible');
-            document.getElementById('override-code').focus();
-          }
-          showAlert(alertEl, "⚠️ This Student ID was used on a different device today. Ask your lecturer for an override code — a field has appeared below.");
-          break;
-        case "override_invalid":
-          if (ovEl) ovEl.classList.add('error');
-          showAlert(alertEl, "Invalid override code. Check what your lecturer gave you.");
-          break;
-        case "override_used":
-          if (ovEl) ovEl.classList.add('error');
-          showAlert(alertEl, "This override code has already been used. Ask your lecturer for a new one.");
-          break;
-        case "override_expired":
-          if (ovEl) ovEl.classList.add('error');
-          showAlert(alertEl, "Override code has expired (10 min limit). Ask your lecturer for a new one.");
-          break;
-        case "invalid_code":
-          document.getElementById('session-code').classList.add('error');
-          showAlert(alertEl, "Invalid session code. Check the board.");
-          break;
-        case "session_expired":
-          document.getElementById('session-code').classList.add('error');
-          showAlert(alertEl, "Session code has expired. Ask your lecturer for a new one.");
-          break;
-        case "location_fail":
-          showAlert(alertEl, `❌ You appear to be outside the classroom (${d.distance || '?'}m away, limit: ${d.allowed || '?'}m). You must be physically present.`);
-          break;
-        case "dept_mismatch":
-          showAlert(alertEl, "This session is not open for your department.");
-          break;
-        case "missing_fields":
-          showAlert(alertEl, "All fields are required.");
-          break;
-        default:
-          showAlert(alertEl, "Login failed: " + (d.error || "unknown error"));
-      }
+      const errorMap = {
+        id_not_found: ['student-id', 'This Student ID is not registered.'],
+        name_mismatch: ['student-name', 'Name does not match this Student ID.'],
+        already_submitted: [null, 'You have already submitted this quiz.'],
+        device_locked: [null, '⚠️ This Student ID was used on a different device. Ask your lecturer for an override code.'],
+        override_invalid: ['override-code', 'Invalid override code.'],
+        override_used: ['override-code', 'This override code has already been used.'],
+        override_expired: ['override-code', 'Override code has expired.'],
+        invalid_code: ['session-code', 'Invalid session code.'],
+        session_expired: ['session-code', 'Session code has expired.'],
+        location_fail: [null, `❌ You are outside the classroom (${d.distance || '?'}m away).`],
+        dept_mismatch: [null, 'This session is not open for your department.'],
+      };
+
+      const [field, msg] = errorMap[d.error] || [null, 'Login failed: unknown error'];
+      if (field) document.getElementById(field).classList.add('error');
+      if (d.error === 'device_locked') document.getElementById('override-field').classList.add('visible');
+
+      showAlert(alertEl, msg);
     }
   } catch(e) {
-    showAlert(alertEl, "Connection error: " + e.message);
+    showAlert(alertEl, 'Connection error: ' + e.message);
   } finally {
-    // Only re-enable button if login FAILED
-    // If login succeeded we are already on the loading page
     if (!loginSuccess) {
       btn.disabled = false;
-      btn.textContent = "Start Quiz";
+      btn.textContent = 'Start Quiz';
     }
   }
 }
 
-// ── LOAD QUESTIONS ───────────────────────────────────────────
+// ====================== QUIZ FUNCTIONS ======================
 async function loadQuestions() {
-  showPage('page-loading');
   try {
-    const d = await post("questions", { id: currentUser.id });
+    const d = await post('questions', { id: currentUser.id });
     if (!d.ok) {
-      if (d.error === "already_submitted") {
-        document.getElementById('loading-msg').textContent = "You have already submitted this quiz.";
-      } else {
-        throw new Error(d.error || "Failed to load questions");
-      }
+      document.getElementById('loading-msg').textContent = d.error === 'already_submitted' 
+        ? 'You have already submitted this quiz.' 
+        : 'Error loading questions.';
       return;
     }
     quizQuestions = d.questions;
     renderQuiz();
     showPage('page-quiz');
   } catch(e) {
-    document.getElementById('loading-msg').textContent = "Error: " + e.message;
+    document.getElementById('loading-msg').textContent = 'Error: ' + e.message;
   }
 }
 
-// ── RENDER QUIZ ──────────────────────────────────────────────
 function renderQuiz() {
-  document.getElementById('quiz-welcome').textContent =
-    `Welcome, ${currentUser.name} (${currentUser.dept})! Answer all ${quizQuestions.length} questions. Correct answers are verified server-side only.`;
-  const c = document.getElementById('questions-container');
-  c.innerHTML = '';
+  document.getElementById('quiz-welcome').textContent = 
+    `Welcome, ${currentUser.name} (${currentUser.dept})! Answer all ${quizQuestions.length} questions.`;
+
+  const container = document.getElementById('questions-container');
+  container.innerHTML = '';
+
   quizQuestions.forEach((q, i) => {
     const card = document.createElement('div');
-    card.className = 'card question-card'; card.id = `card-${q.id}`;
+    card.className = 'card question-card';
+    card.id = `card-${q.id}`;
     card.innerHTML = `
       <div class="question-number">Question ${i+1} of ${quizQuestions.length}</div>
       <div class="question-text">${q.text} <span class="req">*</span></div>
-      ${q.options.map((o,oi)=>`
+      ${q.options.map((opt, idx) => `
         <label class="option">
-          <input type="radio" name="${q.id}" value="${oi}" onchange="onAnswer('${q.id}',${oi})">
+          <input type="radio" name="${q.id}" value="${idx}" onchange="onAnswer('${q.id}', ${idx})">
           <div class="radio-circle"><div class="radio-dot"></div></div>
-          <span class="option-label">${o}</span>
-        </label>`).join('')}
-      <div class="question-error" id="err-${q.id}">This is a required question.</div>`;
-    c.appendChild(card);
+          <span class="option-label">${opt}</span>
+        </label>
+      `).join('')}
+      <div class="question-error" id="err-${q.id}">This question is required.</div>`;
+    container.appendChild(card);
   });
+
   updateProgress();
 }
 
@@ -567,10 +603,12 @@ function onAnswer(qid, val) {
   document.getElementById(`err-${qid}`).classList.remove('visible');
   updateProgress();
 }
+
 function updateProgress() {
   const pct = quizQuestions.length ? (Object.keys(answers).length / quizQuestions.length) * 100 : 0;
   document.getElementById('progress-fill').style.width = pct + '%';
 }
+
 function clearForm() {
   if (!confirm('Clear all answers?')) return;
   answers = {};
@@ -581,74 +619,102 @@ function clearForm() {
   updateProgress();
 }
 
-// ── SUBMIT ───────────────────────────────────────────────────
 async function handleSubmit() {
   if (submitted) return;
+
   const alertEl = document.getElementById('submit-alert');
   alertEl.classList.remove('visible');
-  let allOk = true;
+
+  let allAnswered = true;
   quizQuestions.forEach(q => {
-    if (answers[q.id] === undefined) { document.getElementById(`err-${q.id}`).classList.add('visible'); allOk = false; }
+    if (answers[q.id] === undefined) {
+      document.getElementById(`err-${q.id}`).classList.add('visible');
+      allAnswered = false;
+    }
   });
-  if (!allOk) {
-    const first = quizQuestions.find(q => answers[q.id] === undefined);
-    document.getElementById(`card-${first.id}`).scrollIntoView({ behavior:'smooth', block:'center' });
-    showAlert(alertEl, "Please answer all required questions.");
+
+  if (!allAnswered) {
+    showAlert(alertEl, 'Please answer all questions before submitting.');
     return;
   }
+
   const btn = document.getElementById('submit-btn');
-  btn.disabled = true; btn.textContent = "Submitting…";
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
   try {
-    const d = await post("submit", { id: currentUser.id, name: currentUser.name, answers });
-    if (d.ok) { submitted = true; showResults(d); }
-    else if (d.error === "already_submitted") showAlert(alertEl, "Already submitted. Only one submission allowed.");
-    else { showAlert(alertEl, "Submission failed: " + (d.error || "unknown")); btn.disabled = false; btn.textContent = "Submit"; }
-  } catch(e) { showAlert(alertEl, "Connection error: " + e.message); btn.disabled = false; btn.textContent = "Submit"; }
+    const d = await post('submit', { id: currentUser.id, name: currentUser.name, answers });
+    if (d.ok) {
+      submitted = true;
+      showResults(d);
+    } else {
+      showAlert(alertEl, d.error === 'already_submitted' ? 'You have already submitted this quiz.' : 'Submission failed.');
+      btn.disabled = false;
+      btn.textContent = 'Submit';
+    }
+  } catch(e) {
+    showAlert(alertEl, 'Connection error: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = 'Submit';
+  }
 }
 
-// ── RESULTS ──────────────────────────────────────────────────
 function showResults(data) {
   const { score, total, gradedAnswers } = data;
-  const pct = Math.round(score / total * 100), pass = pct >= 60;
-  const review = quizQuestions.map((q, i) => {
+  const pct = Math.round(score / total * 100);
+  const pass = pct >= 60;
+
+  const reviewHTML = quizQuestions.map((q, i) => {
     const g = gradedAnswers[q.id];
-    return `<div class="review-item ${g.isCorrect?'correct':'wrong'}">
-      <div class="review-q">Q${i+1}. ${q.text}</div>
-      <div class="review-a">Your answer: <strong>${q.options[g.userAnswer]||'No answer'}</strong></div>
-      ${!g.isCorrect?`<div class="review-a">Correct answer: <strong>${q.options[g.correctAnswer]}</strong></div>`:''}
-      <div class="review-status">${g.isCorrect?'✓ Correct':'✗ Incorrect'}</div>
-    </div>`;
+    return `
+      <div class="review-item ${g.isCorrect ? 'correct' : 'wrong'}">
+        <div class="review-q">Q${i+1}. ${q.text}</div>
+        <div class="review-a">Your answer: <strong>${q.options[g.userAnswer] || 'No answer'}</strong></div>
+        ${!g.isCorrect ? `<div class="review-a">Correct: <strong>${q.options[g.correctAnswer]}</strong></div>` : ''}
+        <div class="review-status">${g.isCorrect ? '✓ Correct' : '✗ Incorrect'}</div>
+      </div>`;
   }).join('');
 
   document.getElementById('result-content').innerHTML = `
-    <div class="result-icon ${pass?'pass':'fail'}">${pass?'🎉':'📝'}</div>
-    <div class="result-title">${pass?'Well done!':'Keep practising!'}</div>
-    <div style="font-size:13px;color:var(--gray-5);margin-bottom:4px"><strong>${currentUser.name}</strong> · ${currentUser.id} · ${currentUser.dept}</div>
+    <div class="result-icon ${pass ? 'pass' : 'fail'}">${pass ? '🎉' : '📝'}</div>
+    <div class="result-title">${pass ? 'Well done!' : 'Keep practising!'}</div>
+    <div style="font-size:13px;color:var(--gray-5);margin-bottom:4px">
+      <strong>${currentUser.name}</strong> · ${currentUser.id} · ${currentUser.dept}
+    </div>
     <div class="result-score">${score}/${total}</div>
     <div class="result-meta">
       You scored <strong>${pct}%</strong> — ${score} of ${total} correct.<br>
-      ${pass?'Congratulations, you passed!':'Passing score is 60%.'}<br>
-      <span style="color:var(--green);font-size:12px">✓ Attendance & response saved.</span>
+      ${pass ? 'Congratulations, you passed!' : 'Passing score is 60%.'}<br>
+      <span style="color:var(--green);font-size:12px">✓ Attendance, photo &amp; responses saved.</span>
     </div>
     <div class="answer-review">
-      <div class="review-heading">Answer Review</div>${review}
+      <div class="review-heading">Answer Review</div>
+      ${reviewHTML}
     </div>`;
+
   showPage('page-result');
 }
 
-// ── HELPERS ──────────────────────────────────────────────────
+// ====================== HELPERS ======================
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  window.scrollTo({ top:0, behavior:'smooth' });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-function showAlert(el, msg) { el.textContent = msg; el.classList.add('visible'); }
 
+function showAlert(el, msg) {
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+
+// Keyboard support
 document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('page-login').classList.contains('active')) handleLogin();
+  if (e.key === 'Enter' && document.getElementById('page-login').classList.contains('active')) {
+    handleLogin();
+  }
 });
 
-// Start GPS immediately on load
+// Initialize
 initGPS();
 </script>
 </body>
