@@ -1007,12 +1007,6 @@ async function handleLogin() {
         case "already_submitted":
           msg = "You have already submitted this quiz.";
           break;
-
-        case "device_locked":
-          msg = "Device locked. This Student ID was used on another device today.";
-          document.getElementById('override-field').classList.add('visible');
-          break;
-
         case "override_invalid":
           field = "override-code";
           msg = "Invalid override code.";
@@ -1037,6 +1031,10 @@ async function handleLogin() {
           break;
         case "device_shared":
           msg = "This device has already been used by another student today. Each student must use their own device.";
+          break;        
+        case "device_locked":
+          msg = "This device is locked for your Student ID. Ask lecturer for override code.";
+          document.getElementById('override-field').classList.add('visible');
           break;
         default:
           msg = data.error ? `Error: ${data.error}` : "Unknown error occurred.";
