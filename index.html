@@ -144,9 +144,11 @@
   .url-row .btn { padding:8px 14px; font-size:13px; white-space:nowrap; }
   .url-saved { color:var(--green); font-size:12px; margin-top:6px; display:none; }
 
-  .page { display:none; }
-  .page.active { display:block; animation:fadeIn .3s ease; }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  /* Override code field — hidden until device_locked */
+  .override-field { background:#fff8e1; border:1px solid #ffe082; border-radius:8px; padding:16px; margin-bottom:16px; display:none; }
+  .override-field.visible { display:block; }
+  .override-field-title { font-size:13px; font-weight:500; color:#7a5800; margin-bottom:4px; }
+  .override-field-desc { font-size:12px; color:#9a6f00; margin-bottom:12px; line-height:1.5; }
 
   .divider { border:none; border-top:1px solid var(--gray-3); margin:20px 0; }
 </style>
@@ -241,6 +243,14 @@
         </div>
       </div>
 
+      <!-- Override code — shown only when device_locked -->
+      <div class="override-field" id="override-field">
+        <div class="override-field-title">🔓 Device Override Required</div>
+        <div class="override-field-desc">Your Student ID was used on a different device today. Ask your lecturer for a one-time override code, then enter it below.</div>
+        <label class="field-label" for="override-code">Override Code <span class="req">*</span></label>
+        <input class="text-input code-input" type="text" id="override-code" placeholder="000000" maxlength="6" autocomplete="off" inputmode="numeric">
+      </div>
+
       <button class="btn btn-primary" id="login-btn" onclick="handleLogin()" style="width:100%;justify-content:center;">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
         Start Quiz
@@ -285,7 +295,7 @@
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzVJJ0TvYkBlLXyK3zUQUJS7UIY1gi1A8rm0jtbGrKQ2fHnPH-p5ic8b7LJTB4-kP4pXQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxpWTd_FpmTwGDx-6u0C6VCeSfyarweHuBTSu8Ho-wtHEZg6QK3bpnvqgBDxk_Xd0lgMg/exec";
 let currentUser = null, quizQuestions = [], answers = {}, submitted = false;
 let userLat = null, userLng = null, gpsReady = false;
 let selfieDataUrl = null, selfieConfirmed = false, cameraStream = null;
@@ -417,22 +427,33 @@ async function handleLogin() {
   btn.disabled=true; btn.textContent="Verifying…";
   try {
     const fingerprint = await getFingerprint();
-    const d = await post("login",{id,name,code,lat:userLat,lng:userLng,fingerprint,selfie:selfieDataUrl});
+    const overrideCode = document.getElementById('override-code').value.trim() || null;
+    const d = await post("login",{id,name,code,lat:userLat,lng:userLng,fingerprint,selfie:selfieDataUrl,overrideCode});
     if (d.ok) {
       currentUser={id,name:d.name,dept:d.dept}; stopCamera(); await loadQuestions();
     } else {
       const map = {
-        id_not_found:      ["student-id",   "This Student ID is not registered."],
-        name_mismatch:     ["student-name", "Name does not match this Student ID."],
-        already_submitted: [null,           "You have already submitted this quiz. Only one submission allowed."],
-        device_locked:     [null,           "⚠️ This Student ID was already used on a different device today. Contact your lecturer if this is a mistake."],
-        invalid_code:      ["session-code", "Invalid session code. Check the code on the board."],
-        session_expired:   ["session-code", "Session code has expired. Ask your lecturer for a new one."],
-        location_fail:     [null,           `❌ You appear to be outside the classroom (${d.distance}m away, limit ${d.allowed}m). You must be physically present.`],
-        dept_mismatch:     [null,           "This session is not for your department."],
-        missing_fields:    [null,           "All fields are required."],
+        id_not_found:      ["student-id",    "This Student ID is not registered."],
+        name_mismatch:     ["student-name",  "Name does not match this Student ID."],
+        already_submitted: [null,            "You have already submitted this quiz. Only one submission allowed."],
+        device_locked:     [null,            "⚠️ This Student ID was used on a different device today. Ask your lecturer for an override code — a new field has appeared below."],
+        override_used:     ["override-code", "This override code has already been used. Ask your lecturer for a new one."],
+        override_expired:  ["override-code", "This override code has expired (10 min limit). Ask your lecturer for a new one."],
+        override_invalid:  ["override-code", "Invalid override code. Check what your lecturer gave you."],
+        invalid_code:      ["session-code",  "Invalid session code. Check the code on the board."],
+        session_expired:   ["session-code",  "Session code has expired. Ask your lecturer for a new one."],
+        location_fail:     [null,            `❌ You appear to be outside the classroom (${d.distance}m away, limit ${d.allowed}m). You must be physically present.`],
+        dept_mismatch:     [null,            "This session is not for your department."],
+        missing_fields:    [null,            "All fields are required."],
       };
       const [field,msg]=map[d.error]||[null,"Login failed: "+(d.error||"unknown")];
+      if (field) document.getElementById(field).classList.add('error');
+      if (d.error === "device_locked") {
+        document.getElementById('override-field').classList.add('visible');
+        document.getElementById('override-code').focus();
+      }
+      showAlert(alertEl,msg);
+    }
       if (field) document.getElementById(field).classList.add('error');
       showAlert(alertEl,msg);
     }
