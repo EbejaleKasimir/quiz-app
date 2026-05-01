@@ -914,25 +914,29 @@ function showPage(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+ 
 // ====================== LOGIN ======================
 async function handleLogin() {
-  // Reset override field on every new attempt
+  // Reset override UI
   document.getElementById('override-field').classList.remove('visible');
 
   const id = document.getElementById('student-id').value.trim().toUpperCase();
   const name = document.getElementById('student-name').value.trim();
   const code = document.getElementById('session-code').value.trim();
-  let overrideCode = document.getElementById('override-code').value.trim() || null;
+  const overrideCodeInput = document.getElementById('override-code').value.trim();
+  const overrideCode = overrideCodeInput ? overrideCodeInput : null;
 
   const alertEl = document.getElementById('login-alert');
   const btn = document.getElementById('login-btn');
 
+  // Clear previous errors
   alertEl.classList.remove('visible');
   ['student-id', 'student-name', 'session-code', 'override-code'].forEach(f => {
     const el = document.getElementById(f);
     if (el) el.classList.remove('error');
   });
 
+  // Validation
   if (!id || !name || !code) {
     showAlert(alertEl, "Please fill in all required fields.");
     return;
@@ -951,6 +955,7 @@ async function handleLogin() {
     return;
   }
 
+  // Disable button
   btn.disabled = true;
   btn.textContent = "Verifying...";
 
@@ -967,17 +972,24 @@ async function handleLogin() {
       selfie: selfieDataUrl
     };
 
-    // Only include overrideCode if user actually entered something
     if (overrideCode) {
       payload.overrideCode = overrideCode;
     }
 
+    console.log("Sending login with fingerprint:", fingerprint.substring(0, 20) + "...");
+
     const data = await post("login", payload);
 
     if (data.ok) {
-      currentUser = { id, name: data.name || name, dept: data.dept };
+      currentUser = { 
+        id, 
+        name: data.name || name, 
+        dept: data.dept 
+      };
+      
       showPage('page-loading');
-      await loadQuestions();
+      await loadQuestions();        // Wait for questions to load
+      // Success → Do NOT re-enable button here
     } 
     else {
       let msg = "Login failed. Please try again.";
@@ -997,7 +1009,7 @@ async function handleLogin() {
           break;
 
         case "device_locked":
-          msg = "This device is locked for your Student ID today.";
+          msg = "Device locked. This Student ID was used on another device today.";
           document.getElementById('override-field').classList.add('visible');
           break;
 
@@ -1009,7 +1021,7 @@ async function handleLogin() {
           msg = "This override code has already been used.";
           break;
         case "override_expired":
-          msg = "Override code has expired. Ask your lecturer for a new one.";
+          msg = "Override code expired. Ask lecturer for a new one.";
           break;
 
         case "invalid_code":
@@ -1021,25 +1033,30 @@ async function handleLogin() {
           msg = "Session has expired.";
           break;
         case "location_fail":
-          msg = `You are outside the classroom (${data.distance || '?'}m away, allowed: ${data.allowed || '?'}m).`;
+          msg = `You are ${data.distance || '?'}m away from classroom (allowed: ${data.allowed || '?'}m).`;
           break;
 
         default:
           msg = data.error ? `Error: ${data.error}` : "Unknown error occurred.";
       }
 
-      if (field) {
-        document.getElementById(field).classList.add('error');
-      }
+      if (field) document.getElementById(field).classList.add('error');
       showAlert(alertEl, msg);
+
+      // Re-enable button only on failure
+      btn.disabled = false;
+      btn.textContent = "Start Quiz";
     }
-  } catch (e) {
+  } 
+  catch (e) {
+    console.error("Login error:", e);
     showAlert(alertEl, "Connection error: " + e.message);
-  } finally {
     btn.disabled = false;
     btn.textContent = "Start Quiz";
   }
+  // NO finally block — we manually control button state
 }
+ 
 // ====================== LOAD QUESTIONS ======================
 async function loadQuestions() {
   try {
