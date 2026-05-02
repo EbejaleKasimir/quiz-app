@@ -722,6 +722,7 @@ async function handleLogin() {
 
         case "device_in_use":
           document.getElementById('device-blocked-panel').classList.add('visible');
+          document.getElementById('override-field').classList.add('visible');
           showAlert(alertEl, d.message || "This device is already registered to another student.");
           break;
 
