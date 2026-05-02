@@ -56,8 +56,6 @@
   .gps-block.ok .gps-dot { background:var(--green); }
   .gps-block.fail .gps-dot { background:var(--red); }
   .gps-msg { flex:1; font-weight:500; line-height:1.4; }
-  .gps-steps { padding:0 14px 12px 33px; font-size:12px; line-height:1.8; display:none; }
-  .gps-steps.visible { display:block; }
   .gps-actions { padding:0 14px 12px 33px; display:none; gap:8px; }
   .gps-actions.visible { display:flex; }
   .gps-retry-btn { background:white; border:1px solid currentColor; border-radius:4px; padding:6px 14px; font-size:12px; font-family:'Google Sans',sans-serif; font-weight:500; cursor:pointer; color:inherit; }
@@ -80,11 +78,28 @@
   .selfie-status { font-size:13px; color:var(--green); font-weight:500; margin-top:8px; display:none; }
   .selfie-status.visible { display:block; }
 
-  /* Device Blocked & Override */
-  .device-blocked, .override-field { 
-    background:#fce8e6; border:1px solid #ef9a9a; border-radius:8px; padding:16px; margin-bottom:16px; display:none; 
+  /* ------------------------------------------------------------------ */
+  /* Device error states — THREE distinct panels:                         */
+  /*   .device-blocked-panel   → device owned by another student (hard block, no override path) */
+  /*   .device-mismatch-panel  → this student already logged in on another device (needs override) */
+  /*   .override-field         → shown after either mismatch, for entering the override code       */
+  /* ------------------------------------------------------------------ */
+  .device-blocked-panel {
+    background:#fce8e6; border:1px solid #ef9a9a; border-radius:8px; padding:16px; margin-bottom:16px; display:none;
   }
-  .device-blocked.visible, .override-field.visible { display:block; }
+  .device-blocked-panel.visible { display:block; }
+  .device-blocked-panel strong { color:var(--red); display:block; margin-bottom:6px; }
+
+  .device-mismatch-panel {
+    background:#fff3e0; border:1px solid #ffcc80; border-radius:8px; padding:16px; margin-bottom:16px; display:none;
+  }
+  .device-mismatch-panel.visible { display:block; }
+  .device-mismatch-panel strong { color:var(--orange); display:block; margin-bottom:6px; }
+
+  .override-field {
+    background:#fff8e1; border:1px solid #ffe082; border-radius:8px; padding:16px; margin-bottom:16px; display:none;
+  }
+  .override-field.visible { display:block; }
 
   .progress-bar { background:var(--gray-2); height:4px; border-radius:2px; margin-top:16px; overflow:hidden; }
   .progress-fill { height:100%; background:var(--purple); border-radius:2px; transition:width .4s ease; width:0%; }
@@ -172,7 +187,6 @@
           <div class="gps-dot"></div>
           <div class="gps-msg" id="gps-msg">Detecting your location… please wait</div>
         </div>
-        <ol class="gps-steps" id="gps-steps"></ol>
         <div class="gps-actions" id="gps-actions">
           <button class="gps-retry-btn" onclick="retryGPS()">↻ Try Again</button>
         </div>
@@ -233,17 +247,41 @@
         </div>
       </div>
 
-      <!-- Device Blocked -->
-      <div class="device-blocked" id="device-blocked">
-        <strong>Device Already In Use</strong><br>
-        This device has already been registered by another student today.<br>
-        <small>Each student can only use their own device for this session.</small>
+      <!--
+        FIX (Bug 3 & 4): Three distinct device error panels.
+
+        .device-blocked-panel  → shown for "device_in_use":
+          Another student owns this device. Hard block. No override path.
+          The student must use their own physical device.
+
+        .device-mismatch-panel → shown for "student_device_mismatch":
+          This student already logged in on a different device today.
+          They need a lecturer override code to switch devices.
+
+        .override-field        → shown for "student_device_mismatch" OR "device_check_failed":
+          Let the student enter the override code they received from their lecturer.
+          NOT shown for "device_in_use" — overrides cannot unblock someone else's device.
+      -->
+
+      <!-- Panel 1: Device owned by another student — hard block, no override -->
+      <div class="device-blocked-panel" id="device-blocked-panel">
+        <strong>⛔ Device Already In Use by Another Student</strong>
+        This device has already been registered to a different student today.
+        Each student must use their own device. Borrowing another student's device is not permitted.
+        <br><small style="color:var(--gray-5);margin-top:6px;display:block">If you believe this is an error, please speak to your lecturer.</small>
       </div>
 
-      <!-- Override Field -->
+      <!-- Panel 2: Same student, different device — override needed -->
+      <div class="device-mismatch-panel" id="device-mismatch-panel">
+        <strong>⚠️ Different Device Detected</strong>
+        You have already logged in today on a different device. Only one device per student is allowed per session.
+        <br>Ask your lecturer for a one-time override code if you need to switch devices.
+      </div>
+
+      <!-- Override entry — only shown for mismatch / check_failed, never for device_in_use -->
       <div class="override-field" id="override-field">
-        <div class="override-field-title">🔓 Lecturer Override Required</div>
-        <div class="override-field-desc">Ask your lecturer for a one-time override code to use this device.</div>
+        <div style="font-weight:500;margin-bottom:4px;color:#7a5800">🔓 Lecturer Override Code</div>
+        <div style="font-size:13px;color:var(--gray-5);margin-bottom:12px;line-height:1.5">Enter the 6-digit code your lecturer gave you verbally. It is single-use and expires in 10 minutes.</div>
         <label class="field-label" for="override-code">Override Code <span class="req">*</span></label>
         <input class="text-input code-input" type="text" id="override-code" placeholder="000000" maxlength="6" autocomplete="off" inputmode="numeric">
       </div>
@@ -302,22 +340,50 @@ let userLat = null, userLng = null, gpsReady = false;
 let selfieDataUrl = null, selfieConfirmed = false, cameraStream = null;
 let gpsWatcher = null, gpsAttempt = 0;
 
-// ====================== FINGERPRINT ======================
+// ====================== FINGERPRINT (Fixed - Bug 1) ======================
+// FIX (Bug 1): Added sessionSalt — a random value stored in sessionStorage —
+// so that every browser session on the same device gets a unique contribution
+// to the hash. Without this, two students on identical hardware (same phone
+// model, same browser) could collide to an identical fingerprint.
+//
+// sessionStorage is cleared when the tab is closed, so refreshing the same
+// page keeps the same salt (and thus the same fingerprint for that session),
+// while opening a fresh tab generates a new one.  This gives us:
+//   • Stability:   same student reloading → same fingerprint → "ok_same"
+//   • Uniqueness:  different people's browsers → different fingerprints
 async function getFingerprint() {
+  // Get or create a per-session random salt.
+  let sessionSalt = sessionStorage.getItem('_fp_salt');
+  if (!sessionSalt) {
+    const arr = new Uint8Array(16);
+    crypto.getRandomValues(arr);
+    sessionSalt = Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+    sessionStorage.setItem('_fp_salt', sessionSalt);
+  }
+
+  // Canvas fingerprint — draw with sessionSalt baked in so the output
+  // differs even on identical hardware.
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   ctx.textBaseline = "top";
   ctx.font = "14px Arial";
-  ctx.fillText("Device Fingerprint", 2, 2);
-  const canvasHash = canvas.toDataURL().slice(0, 100);
+  ctx.fillStyle = "#f60";
+  ctx.fillRect(125, 1, 62, 20);
+  ctx.fillStyle = "#069";
+  ctx.fillText("Device " + sessionSalt.slice(0, 8), 2, 15);
+  ctx.fillStyle = "rgba(102,204,0,0.7)";
+  ctx.fillText("Device " + sessionSalt.slice(0, 8), 4, 17);
+  const canvasHash = canvas.toDataURL().slice(0, 120);
 
   const raw = [
+    sessionSalt,                          // unique per browser session
     navigator.userAgent,
     navigator.language,
     screen.width + "x" + screen.height,
     screen.colorDepth,
     navigator.hardwareConcurrency || "",
-    canvasHash,                    // extra entropy
+    navigator.deviceMemory || "",         // extra hardware signal where available
+    canvasHash,
     new Date().getTimezoneOffset()
   ].join('|');
 
@@ -337,11 +403,11 @@ function initGPS() {
 
 function requestGPS() {
   gpsAttempt++;
-  setGpsStatus('detecting', `Detecting location... (attempt ${gpsAttempt})`);
+  setGpsStatus('detecting', `Detecting location… (attempt ${gpsAttempt})`);
 
   navigator.geolocation.getCurrentPosition(onGPSSuccess, () => {
-    setGpsStatus('partial', 'Still trying...');
-    gpsWatcher = navigator.geolocation.watchPosition(onGPSSuccess, onGPSError, 
+    setGpsStatus('detecting', 'Still trying…');
+    gpsWatcher = navigator.geolocation.watchPosition(onGPSSuccess, onGPSError,
       { enableHighAccuracy: true, timeout: 30000 });
   }, { enableHighAccuracy: false, timeout: 8000 });
 }
@@ -367,7 +433,7 @@ function setGpsStatus(type, msg) {
   const block = document.getElementById('gps-block');
   block.className = `gps-block ${type}`;
   document.getElementById('gps-msg').textContent = msg;
-  document.getElementById('gps-actions').classList.toggle('visible', type === 'fail' || type === 'partial');
+  document.getElementById('gps-actions').classList.toggle('visible', type === 'fail');
 }
 
 // ====================== SELFIE ======================
@@ -405,7 +471,8 @@ function confirmPhoto() {
   stopCamera();
   document.getElementById('selfie-confirm').style.display = 'none';
   document.getElementById('selfie-status').classList.add('visible');
-  document.getElementById('selfie-block').classList.remove('active').classList.add('done');
+  document.getElementById('selfie-block').classList.remove('active');
+  document.getElementById('selfie-block').classList.add('done');
 }
 
 function retakePhoto() {
@@ -442,21 +509,25 @@ async function post(action, payload = {}) {
   return r.json();
 }
 
-// ====================== LOGIN (Fixed for device_in_use) ======================
+// ====================== RESET UI helpers ======================
+function resetDevicePanels() {
+  document.getElementById('device-blocked-panel').classList.remove('visible');
+  document.getElementById('device-mismatch-panel').classList.remove('visible');
+  document.getElementById('override-field').classList.remove('visible');
+}
+
+// ====================== LOGIN ======================
 async function handleLogin() {
-  const id = document.getElementById('student-id').value.trim().toUpperCase();
+  const id   = document.getElementById('student-id').value.trim().toUpperCase();
   const name = document.getElementById('student-name').value.trim();
   const code = document.getElementById('session-code').value.trim();
   const overrideCode = document.getElementById('override-code').value.trim() || null;
 
   const alertEl = document.getElementById('login-alert');
-  const deviceBlockedEl = document.getElementById('device-blocked');
-  const overrideField = document.getElementById('override-field');
 
-  // Reset UI
+  // Reset all error UI
   alertEl.classList.remove('visible');
-  deviceBlockedEl.classList.remove('visible');
-  overrideField.classList.remove('visible');
+  resetDevicePanels();
   ['student-id','student-name','session-code','override-code'].forEach(f => {
     const el = document.getElementById(f);
     if (el) el.classList.remove('error');
@@ -468,7 +539,7 @@ async function handleLogin() {
     return showAlert(alertEl, 'Session code must be 6 digits.');
   }
   if (!selfieConfirmed) return showAlert(alertEl, 'Please take a selfie.');
-  if (!gpsReady) return showAlert(alertEl, 'Location is not ready yet.');
+  if (!gpsReady) return showAlert(alertEl, 'Location is not ready yet. Please wait or tap Try Again.');
 
   const btn = document.getElementById('login-btn');
   btn.disabled = true;
@@ -490,37 +561,76 @@ async function handleLogin() {
       stopCamera();
       showPage('page-loading');
       await loadQuestions();
+
     } else {
-      if (d.error === "device_in_use") {
-        deviceBlockedEl.classList.add('visible');
-        showAlert(alertEl, d.message || "This device is already used by another student today.");
-      } 
-      else if (d.error === "device_locked" || d.error === "device_check_failed") {
-        overrideField.classList.add('visible');
-        showAlert(alertEl, "Device locked. Lecturer override required.");
-      }
-      else if (d.error === "id_not_found") {
-        document.getElementById('student-id').classList.add('error');
-        showAlert(alertEl, "Student ID not registered.");
-      }
-      else if (d.error === "name_mismatch") {
-        document.getElementById('student-name').classList.add('error');
-        showAlert(alertEl, "Name does not match Student ID.");
-      }
-      else if (d.error === "already_submitted") {
-        showAlert(alertEl, "You have already submitted this quiz.");
-      }
-      else if (d.error === "invalid_code" || d.error === "session_expired") {
-        document.getElementById('session-code').classList.add('error');
-        showAlert(alertEl, "Invalid or expired session code.");
-      }
-      else if (d.error === "location_fail") {
-        showAlert(alertEl, `You are outside the classroom (${d.distance || '?'}m away).`);
-      }
-      else {
-        showAlert(alertEl, d.message || "Login failed. Please try again.");
+
+      // ── FIX (Bug 3 & 4): Each error maps to exactly one UI state ──────
+      switch (d.error) {
+
+        case "device_in_use":
+          // A DIFFERENT student already owns this physical device.
+          // Show the hard-block panel only — no override path.
+          document.getElementById('device-blocked-panel').classList.add('visible');
+          showAlert(alertEl, d.message || "This device is already registered to another student.");
+          break;
+
+        case "student_device_mismatch":
+          // THIS student already logged in from a different device today.
+          // Show the mismatch warning AND the override entry field.
+          document.getElementById('device-mismatch-panel').classList.add('visible');
+          document.getElementById('override-field').classList.add('visible');
+          showAlert(alertEl, d.message || "Different device detected. Enter your override code below.");
+          break;
+
+        case "device_check_failed":
+          // Technical failure (missing fingerprint, lock timeout, etc.).
+          // Show override field in case a lecturer can help.
+          document.getElementById('override-field').classList.add('visible');
+          showAlert(alertEl, "Device verification failed. Ask your lecturer for an override code if this persists.");
+          break;
+
+        case "override_used":
+          showAlert(alertEl, "This override code has already been used. Ask your lecturer for a new one.");
+          break;
+
+        case "override_expired":
+          showAlert(alertEl, "This override code has expired. Ask your lecturer for a new one.");
+          break;
+
+        case "override_invalid":
+          document.getElementById('override-code').classList.add('error');
+          showAlert(alertEl, "Override code is invalid. Please check it and try again.");
+          break;
+
+        case "id_not_found":
+          document.getElementById('student-id').classList.add('error');
+          showAlert(alertEl, "Student ID not registered. Check your ID and try again.");
+          break;
+
+        case "name_mismatch":
+          document.getElementById('student-name').classList.add('error');
+          showAlert(alertEl, "Name does not match the registered Student ID.");
+          break;
+
+        case "already_submitted":
+          showAlert(alertEl, "You have already submitted this quiz.");
+          break;
+
+        case "invalid_code":
+        case "session_expired":
+          document.getElementById('session-code').classList.add('error');
+          showAlert(alertEl, "Invalid or expired session code. Check the board and try again.");
+          break;
+
+        case "location_fail":
+          showAlert(alertEl, `You appear to be outside the classroom (${d.distance || '?'}m away, limit is ${d.allowed || '?'}m). Make sure location services are on.`);
+          break;
+
+        default:
+          showAlert(alertEl, d.message || "Login failed. Please try again.");
       }
     }
+
   } catch(e) {
     showAlert(alertEl, 'Connection error: ' + e.message);
   } finally {
@@ -531,12 +641,12 @@ async function handleLogin() {
   }
 }
 
-// ====================== Remaining Functions ======================
+// ====================== QUIZ ======================
 async function loadQuestions() {
   try {
     const d = await post('questions', { id: currentUser.id });
     if (!d.ok) {
-      document.getElementById('loading-msg').textContent = 'Error loading questions.';
+      document.getElementById('loading-msg').textContent = 'Error loading questions: ' + (d.error || 'unknown');
       return;
     }
     quizQuestions = d.questions;
@@ -548,7 +658,7 @@ async function loadQuestions() {
 }
 
 function renderQuiz() {
-  document.getElementById('quiz-welcome').textContent = 
+  document.getElementById('quiz-welcome').textContent =
     `Welcome, ${currentUser.name} (${currentUser.dept})! Answer all ${quizQuestions.length} questions.`;
 
   const container = document.getElementById('questions-container');
@@ -607,7 +717,7 @@ async function handleSubmit() {
     }
   });
 
-  if (!allOk) return showAlert(alertEl, 'Please answer all questions.');
+  if (!allOk) return showAlert(alertEl, 'Please answer all questions before submitting.');
 
   const btn = document.getElementById('submit-btn');
   btn.disabled = true; btn.textContent = 'Submitting…';
@@ -618,18 +728,18 @@ async function handleSubmit() {
       submitted = true;
       showResults(d);
     } else {
-      showAlert(alertEl, 'Submission failed.');
+      showAlert(alertEl, 'Submission failed: ' + (d.error || 'unknown error'));
       btn.disabled = false; btn.textContent = 'Submit';
     }
   } catch(e) {
-    showAlert(alertEl, 'Connection error.');
+    showAlert(alertEl, 'Connection error: ' + e.message);
     btn.disabled = false; btn.textContent = 'Submit';
   }
 }
 
 function showResults(data) {
   const { score, total, gradedAnswers } = data;
-  const pct = Math.round(score / total * 100);
+  const pct  = Math.round(score / total * 100);
   const pass = pct >= 60;
 
   const review = quizQuestions.map((q, i) => {
