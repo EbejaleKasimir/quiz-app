@@ -340,59 +340,144 @@ let userLat = null, userLng = null, gpsReady = false;
 let selfieDataUrl = null, selfieConfirmed = false, cameraStream = null;
 let gpsWatcher = null, gpsAttempt = 0;
 
-// ====================== FINGERPRINT (Fixed - Bug 1) ======================
-// FIX (Bug 1): Added sessionSalt — a random value stored in sessionStorage —
-// so that every browser session on the same device gets a unique contribution
-// to the hash. Without this, two students on identical hardware (same phone
-// model, same browser) could collide to an identical fingerprint.
+// ====================== FINGERPRINT ======================
+// Goal: produce the SAME hash every time this specific physical device
+// loads this page, and a DIFFERENT hash on any other physical device.
 //
-// sessionStorage is cleared when the tab is closed, so refreshing the same
-// page keeps the same salt (and thus the same fingerprint for that session),
-// while opening a fresh tab generates a new one.  This gives us:
-//   • Stability:   same student reloading → same fingerprint → "ok_same"
-//   • Uniqueness:  different people's browsers → different fingerprints
+// Rules:
+//   • NO random values, NO sessionStorage, NO localStorage, NO Date.now().
+//     Every input must be a deterministic hardware/browser property.
+//   • Same device + same browser  →  identical fingerprint on every load.
+//   • Different device            →  different fingerprint (with high probability).
+//
+// Signal strategy:
+//   1. Canvas rendering — the most discriminating signal. The GPU driver, OS
+//      font rasteriser, and sub-pixel rendering pipeline all affect how pixels
+//      are placed. Two phones of the same model but different firmware/GPU
+//      driver versions will produce different pixel values for the same draw
+//      commands. We draw multiple overlapping shapes and text at fractional
+//      positions to maximise these micro-differences. We take the FULL
+//      toDataURL() string (not just a slice) so no entropy is discarded.
+//   2. WebGL renderer string — identifies the exact GPU + driver string
+//      (e.g. "ANGLE (Qualcomm Adreno 650 Direct3D11 vs_5_0 ps_5_0)").
+//      This is stable across page loads and highly device-specific.
+//   3. Audio context fingerprint — the AudioContext processes a constant
+//      oscillator through a compressor; floating-point accumulation differs
+//      per hardware/OS audio stack and produces a stable decimal value.
+//   4. Hardware enumeration — screen dimensions, colour depth, pixel ratio,
+//      CPU core count, device memory, timezone, language, platform, and the
+//      full user-agent string. These alone are weak but reinforce the above.
+//
+// Together these signals make accidental collision between two different real
+// devices extremely unlikely while keeping the hash perfectly stable for the
+// same device across page reloads, tab closes, and browser restarts.
 async function getFingerprint() {
-  // Get or create a per-session random salt.
-  let sessionSalt = sessionStorage.getItem('_fp_salt');
-  if (!sessionSalt) {
-    const arr = new Uint8Array(16);
-    crypto.getRandomValues(arr);
-    sessionSalt = Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
-    sessionStorage.setItem('_fp_salt', sessionSalt);
-  }
 
-  // Canvas fingerprint — draw with sessionSalt baked in so the output
-  // differs even on identical hardware.
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.textBaseline = "top";
-  ctx.font = "14px Arial";
-  ctx.fillStyle = "#f60";
-  ctx.fillRect(125, 1, 62, 20);
-  ctx.fillStyle = "#069";
-  ctx.fillText("Device " + sessionSalt.slice(0, 8), 2, 15);
-  ctx.fillStyle = "rgba(102,204,0,0.7)";
-  ctx.fillText("Device " + sessionSalt.slice(0, 8), 4, 17);
-  const canvasHash = canvas.toDataURL().slice(0, 120);
+  // ── 1. Canvas fingerprint ────────────────────────────────
+  // Draw shapes, gradients, and Unicode text at sub-pixel positions.
+  // The exact pixel output depends on the GPU/driver/rasteriser.
+  const cvs = document.createElement('canvas');
+  cvs.width = 200; cvs.height = 50;
+  const ctx = cvs.getContext('2d');
 
-  const raw = [
-    sessionSalt,                          // unique per browser session
+  // Background gradient
+  const grad = ctx.createLinearGradient(0, 0, 200, 0);
+  grad.addColorStop(0,   'rgb(255,0,128)');
+  grad.addColorStop(0.5, 'rgb(0,255,128)');
+  grad.addColorStop(1,   'rgb(0,128,255)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 200, 50);
+
+  // Overlapping semi-transparent shapes
+  ctx.globalAlpha = 0.6;
+  ctx.fillStyle = 'rgba(102,204,0,0.7)';
+  ctx.beginPath(); ctx.arc(50, 25, 20, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = 'rgba(255,165,0,0.5)';
+  ctx.fillRect(80, 5, 60, 40);
+
+  // Text at fractional position — font hinting differs per OS/GPU
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#1a1a2e';
+  ctx.font = '11px Arial, sans-serif';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText('Cwm fjord veg balks nth px', 2.3, 33.7);
+  ctx.font = 'italic bold 13px Georgia, serif';
+  ctx.fillStyle = 'rgba(30,120,200,0.9)';
+  ctx.fillText('\u0041\u03B1\u4E2D\u0627\u05D0', 100, 20);
+
+  const canvasFp = cvs.toDataURL(); // full string — no slicing
+
+  // ── 2. WebGL renderer string ─────────────────────────────
+  // Identifies the exact GPU and driver version.
+  let webglFp = '';
+  try {
+    const gl = document.createElement('canvas').getContext('webgl') ||
+               document.createElement('canvas').getContext('experimental-webgl');
+    if (gl) {
+      const dbgInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      if (dbgInfo) {
+        webglFp = [
+          gl.getParameter(dbgInfo.UNMASKED_VENDOR_WEBGL),
+          gl.getParameter(dbgInfo.UNMASKED_RENDERER_WEBGL)
+        ].join('|');
+      } else {
+        webglFp = gl.getParameter(gl.RENDERER) + '|' + gl.getParameter(gl.VENDOR);
+      }
+    }
+  } catch(_) {}
+
+  // ── 3. Audio context fingerprint ─────────────────────────
+  // Floating-point accumulation in the audio pipeline differs per hardware.
+  let audioFp = '';
+  try {
+    const AudioCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (AudioCtx) {
+      const actx = new AudioCtx(1, 4096, 44100);
+      const osc  = actx.createOscillator();
+      const comp = actx.createDynamicsCompressor();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(10000, actx.currentTime);
+      // DynamicsCompressor settings maximise hardware-dependent accumulation
+      comp.threshold.setValueAtTime(-50, actx.currentTime);
+      comp.knee.setValueAtTime(40,      actx.currentTime);
+      comp.ratio.setValueAtTime(12,     actx.currentTime);
+      comp.attack.setValueAtTime(0,     actx.currentTime);
+      comp.release.setValueAtTime(0.25, actx.currentTime);
+      osc.connect(comp);
+      comp.connect(actx.destination);
+      osc.start(0);
+      const buf = await actx.startRendering();
+      const data = buf.getChannelData(0);
+      // Sum a slice of samples — the exact values differ per audio stack
+      let sum = 0;
+      for (let i = 4500; i < 5000; i++) sum += Math.abs(data[i]);
+      audioFp = sum.toString();
+    }
+  } catch(_) {}
+
+  // ── 4. Hardware & browser signals ───────────────────────
+  const hw = [
     navigator.userAgent,
     navigator.language,
-    screen.width + "x" + screen.height,
+    navigator.languages ? navigator.languages.join(',') : '',
+    navigator.platform || '',
+    screen.width + 'x' + screen.height,
+    screen.availWidth + 'x' + screen.availHeight,
     screen.colorDepth,
-    navigator.hardwareConcurrency || "",
-    navigator.deviceMemory || "",         // extra hardware signal where available
-    canvasHash,
-    new Date().getTimezoneOffset()
+    (window.devicePixelRatio || 1).toFixed(3),
+    navigator.hardwareConcurrency || '',
+    navigator.deviceMemory || '',
+    new Date().getTimezoneOffset(),
+    Intl.DateTimeFormat().resolvedOptions().timeZone || ''
   ].join('|');
 
+  // ── Hash all signals together ────────────────────────────
+  const raw = [canvasFp, webglFp, audioFp, hw].join('||');
   const buf = new TextEncoder().encode(raw);
-  const hash = await crypto.subtle.digest('SHA-256', buf);
-  return Array.from(new Uint8Array(hash))
+  const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hashBuf))
     .map(b => b.toString(16).padStart(2, '0'))
-    .join('')
-    .slice(0, 64);
+    .join('');
 }
 
 // ====================== GPS ======================
