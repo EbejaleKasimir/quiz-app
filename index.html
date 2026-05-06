@@ -667,7 +667,6 @@ async function handleLogin() {
   const overrideCode = document.getElementById('override-code').value.trim() || null;
   const alertEl      = document.getElementById('login-alert');
 
-  // Clear previous errors
   alertEl.classList.remove('visible');
   resetDevicePanels();
   ['student-id','student-name','session-code','override-code'].forEach(f => {
@@ -675,7 +674,6 @@ async function handleLogin() {
     if (el) el.classList.remove('error');
   });
 
-  // Basic field checks
   if (!id || !name || !code) return showAlert(alertEl, 'Please fill all required fields.');
   if (code.length !== 6 || !/^\d+$/.test(code)) {
     document.getElementById('session-code').classList.add('error');
@@ -684,9 +682,6 @@ async function handleLogin() {
   if (!selfieConfirmed) return showAlert(alertEl, 'Please take a selfie.');
   if (!gpsReady)        return showAlert(alertEl, 'Location is not ready yet. Please wait or tap Try Again.');
 
-  // FIX-D: Hard-block the submit if fingerprint failed on the frontend.
-  // This matches the server-side guard in handleLogin (Code.gs FIX-A).
-  // Belt AND braces — both sides reject.
   if (fpState !== 'ready' || !fpValue) {
     return showAlert(alertEl,
       'Device identification is not ready. ' +
@@ -700,14 +695,46 @@ async function handleLogin() {
 
   let success = false;
 
-  try {
-    // fpValue is already computed — no need to call getFingerprint() again.
-    // This avoids a second async call that could theoretically produce a
-    // different hash if the page state changed (it shouldn't, but why risk it).
-    const payload = { id, name, code, lat: userLat, lng: userLng, fingerprint: fpValue, selfie: selfieDataUrl };
-    if (overrideCode) payload.overrideCode = overrideCode;
+  // Auto-retry up to 4 times for busy server or connection errors
+  let d = null;
+  let attempts = 0;
+  const maxAttempts = 4;
 
-    const d = await post('login', payload);
+  while (attempts < maxAttempts) {
+    attempts++;
+    try {
+      const payload = { 
+        id, name, code, 
+        lat: userLat, lng: userLng, 
+        fingerprint: fpValue, 
+        selfie: selfieDataUrl 
+      };
+      if (overrideCode) payload.overrideCode = overrideCode;
+
+      d = await post('login', payload);
+
+      if (!d.ok && d.error === 'device_check_failed' && 
+          d.message && d.message.includes('busy')) {
+        if (attempts < maxAttempts) {
+          btn.textContent = `Server busy — retrying (${attempts}/${maxAttempts})…`;
+          await new Promise(r => setTimeout(r, 3000));
+          continue;
+        }
+      }
+      break;
+
+    } catch(e) {
+      if (attempts < maxAttempts) {
+        btn.textContent = `Connection error — retrying (${attempts}/${maxAttempts})…`;
+        await new Promise(r => setTimeout(r, 3000));
+        continue;
+      }
+      showAlert(alertEl, 'Connection error after ' + maxAttempts + ' attempts: ' + e.message);
+      btn.disabled = false;
+      btn.textContent = 'Start Quiz';
+      return;
+    }
+  }
 
     if (d.ok) {
       success = true;
@@ -779,16 +806,11 @@ async function handleLogin() {
       }
     }
 
-  } catch(e) {
-    showAlert(alertEl, 'Connection error: ' + e.message);
-  } finally {
-    if (!success) {
-      btn.disabled = false;
-      btn.textContent = 'Start Quiz';
-    }
+  if (!success) {
+    btn.disabled = false;
+    btn.textContent = 'Start Quiz';
   }
 }
-
 // ====================== QUIZ ======================
 async function loadQuestions() {
   try {
