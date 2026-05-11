@@ -4,951 +4,1094 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Class Quiz</title>
-<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --purple:#673AB7; --purple-light:#EDE7F6;
-    --red:#d93025; --green:#1e8e3e; --orange:#e37400;
-    --gray-1:#f8f9fa; --gray-2:#e8eaed; --gray-3:#dadce0; --gray-4:#9aa0a6; --gray-5:#5f6368; --gray-6:#3c4043;
-    --text:#202124;
-  }
-  body { font-family:'Roboto',sans-serif; background:#f0ebf8; min-height:100vh; color:var(--text); }
-  .header { background:white; border-bottom:1px solid var(--gray-3); padding:0 24px; height:64px; display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:100; box-shadow:0 1px 2px rgba(0,0,0,.1); }
-  .header-icon { width:32px; height:32px; background:var(--purple); border-radius:4px; display:flex; align-items:center; justify-content:center; }
-  .header-title { font-family:'Google Sans',sans-serif; font-size:22px; color:var(--gray-5); font-weight:400; }
-  .header-title span { color:var(--purple); }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  .main { max-width:680px; margin:0 auto; padding:24px 16px 80px; }
-  .card { background:white; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.14); margin-bottom:12px; overflow:hidden; }
-  .banner-card { border-top:10px solid var(--purple); }
-  .banner-content { padding:24px; }
-  .form-title { font-family:'Google Sans',sans-serif; font-size:32px; font-weight:400; margin-bottom:8px; }
-  .form-desc { font-size:14px; color:var(--gray-5); line-height:1.5; }
-  .required-note { font-size:13px; color:var(--red); margin-top:16px; }
+:root {
+  --ink: #0f0f11;
+  --ink-2: #3c3c45;
+  --ink-3: #7a7a88;
+  --ink-4: #b8b8c4;
+  --surface: #ffffff;
+  --surface-2: #f5f5f8;
+  --surface-3: #ededf2;
+  --border: #e2e2ea;
+  --accent: #4f46e5;
+  --accent-light: #eef2ff;
+  --accent-2: #7c3aed;
+  --green: #059669;
+  --green-light: #ecfdf5;
+  --red: #dc2626;
+  --red-light: #fef2f2;
+  --orange: #d97706;
+  --orange-light: #fffbeb;
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
+  --shadow-lg: 0 4px 6px rgba(0,0,0,.04), 0 12px 40px rgba(0,0,0,.12);
+}
 
-  .section { padding:24px; }
-  .section h2 { font-family:'Google Sans',sans-serif; font-size:16px; font-weight:500; margin-bottom:4px; }
-  .section > p { font-size:13px; color:var(--gray-5); margin-bottom:20px; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--surface-2);
+  color: var(--ink);
+  min-height: 100vh;
+  line-height: 1.5;
+}
 
-  .field-group { margin-bottom:20px; }
-  .field-label { display:block; font-size:14px; color:var(--gray-6); margin-bottom:8px; font-weight:500; }
-  .field-label .req { color:var(--red); margin-left:2px; }
+/* ── Header ─────────────────────────────────────────────── */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.topbar-logo {
+  width: 28px; height: 28px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+}
+.topbar-logo svg { display: block; }
+.topbar-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -.2px;
+}
+.topbar-name span { color: var(--accent); }
 
-  .text-input { width:100%; border:1px solid var(--gray-3); border-radius:4px; padding:10px 12px; font-size:14px; font-family:'Roboto',sans-serif; color:var(--text); outline:none; transition:border-color .15s; }
-  .text-input:focus { border-color:var(--purple); border-width:2px; }
-  .text-input.error { border-color:var(--red); border-width:2px; }
-  .code-input { font-size:22px; font-weight:500; letter-spacing:6px; text-align:center; font-family:'Google Sans',sans-serif; }
+/* ── Layout ─────────────────────────────────────────────── */
+.wrap { max-width: 620px; margin: 0 auto; padding: 24px 16px 80px; }
 
-  .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 24px; border-radius:4px; border:none; font-family:'Google Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:background .15s; }
-  .btn-primary, .btn-submit { background:var(--purple); color:white; }
-  .btn-primary:hover:not(:disabled), .btn-submit:hover:not(:disabled) { background:#5e35b1; }
-  .btn-primary:disabled, .btn-submit:disabled { background:var(--gray-3); color:var(--gray-4); cursor:not-allowed; }
+/* ── Card ─────────────────────────────────────────────────  */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.card-hero {
+  border-top: 4px solid var(--accent);
+}
+.card-hero .hero-body {
+  padding: 28px 24px 20px;
+}
+.hero-title {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -.5px;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.hero-sub {
+  font-size: 14px;
+  color: var(--ink-3);
+}
+.hero-req {
+  font-size: 12px;
+  color: var(--red);
+  margin-top: 12px;
+  font-weight: 500;
+}
 
-  /* GPS */
-  .gps-block { border-radius:8px; font-size:13px; margin-bottom:20px; overflow:hidden; border:1px solid; }
-  .gps-block.detecting { background:#fff8e1; border-color:#ffe082; color:var(--orange); }
-  .gps-block.ok { background:#e6f4ea; border-color:#a8d5b5; color:#1b5e20; }
-  .gps-block.fail { background:#fce8e6; border-color:#ef9a9a; color:#b71c1c; }
-  .gps-top { display:flex; align-items:center; gap:10px; padding:12px 14px; }
-  .gps-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
-  .gps-block.detecting .gps-dot { background:var(--orange); animation:pulse 1.2s infinite; }
-  .gps-block.ok .gps-dot { background:var(--green); }
-  .gps-block.fail .gps-dot { background:var(--red); }
-  .gps-msg { flex:1; font-weight:500; line-height:1.4; }
-  .gps-actions { padding:0 14px 12px 33px; display:none; gap:8px; }
-  .gps-actions.visible { display:flex; }
-  .gps-retry-btn { background:white; border:1px solid currentColor; border-radius:4px; padding:6px 14px; font-size:12px; font-family:'Google Sans',sans-serif; font-weight:500; cursor:pointer; color:inherit; }
+.card-body { padding: 24px; }
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-bottom: 16px;
+}
 
-  /* ── Fingerprint status bar ──────────────────────────────
-     FIX-D: The fingerprint state is now visible to the user.
-     "computing" → orange pulsing dot while async signals resolve
-     "ready"     → green dot once the hash is confirmed
-     "error"     → red, explains why and what to try
-     The Start Quiz button stays disabled until state === "ready".
-  ────────────────────────────────────────────────────────── */
-  .fp-block { border-radius:8px; font-size:13px; margin-bottom:20px; overflow:hidden; border:1px solid; }
-  .fp-block.computing { background:#fff8e1; border-color:#ffe082; color:var(--orange); }
-  .fp-block.ready     { background:#e6f4ea; border-color:#a8d5b5; color:#1b5e20; }
-  .fp-block.fp-error  { background:#fce8e6; border-color:#ef9a9a; color:#b71c1c; }
-  .fp-top { display:flex; align-items:center; gap:10px; padding:12px 14px; }
-  .fp-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
-  .fp-block.computing .fp-dot { background:var(--orange); animation:pulse 1.2s infinite; }
-  .fp-block.ready     .fp-dot { background:var(--green); }
-  .fp-block.fp-error  .fp-dot { background:var(--red); }
-  .fp-msg { flex:1; font-weight:500; line-height:1.4; }
-  .fp-retry-btn { background:white; border:1px solid currentColor; border-radius:4px; padding:6px 14px; font-size:12px; font-family:'Google Sans',sans-serif; font-weight:500; cursor:pointer; color:inherit; }
-  .fp-actions { padding:0 14px 12px 33px; display:none; gap:8px; }
-  .fp-actions.visible { display:flex; }
+/* ── Status bars ─────────────────────────────────────────── */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  transition: all .2s;
+}
+.status-bar .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-bar .msg { flex: 1; line-height: 1.4; }
+.status-bar .retry-btn {
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 5px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  color: inherit;
+  white-space: nowrap;
+}
 
-  /* Selfie */
-  .selfie-block { border:2px dashed var(--gray-3); border-radius:12px; padding:20px; text-align:center; margin-bottom:20px; background:var(--gray-1); transition:border-color .2s; }
-  .selfie-block.active { border-color:var(--purple); background:#EDE7F6; }
-  .selfie-block.done { border-color:var(--green); border-style:solid; background:#e6f4ea; }
-  .selfie-preview { width:120px; height:120px; border-radius:50%; object-fit:cover; border:3px solid var(--purple); margin:0 auto 12px; display:none; }
-  .selfie-preview.visible { display:block; }
-  video#selfie-video { width:100%; max-width:320px; height:240px; border-radius:8px; object-fit:cover; display:none; background:#000; }
-  video#selfie-video.visible { display:block; margin:0 auto 12px; }
-  canvas#selfie-canvas { display:none; }
-  .selfie-icon { font-size:48px; margin-bottom:8px; }
-  .selfie-label { font-size:14px; color:var(--gray-5); margin-bottom:12px; line-height:1.4; }
-  .selfie-label strong { color:var(--text); display:block; font-size:15px; margin-bottom:4px; }
-  .selfie-btn { background:var(--purple); color:white; border:none; border-radius:4px; padding:10px 20px; font-family:'Google Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
-  .selfie-btn:hover { background:#5e35b1; }
-  .selfie-btn.secondary { background:white; color:var(--purple); border:1px solid var(--purple); }
-  .selfie-status { font-size:13px; color:var(--green); font-weight:500; margin-top:8px; display:none; }
-  .selfie-status.visible { display:block; }
+.status-bar.pending  { background: var(--orange-light); border-color: #fde68a; color: #92400e; }
+.status-bar.ok       { background: var(--green-light);  border-color: #a7f3d0; color: #065f46; }
+.status-bar.fail     { background: var(--red-light);    border-color: #fecaca; color: #991b1b; }
+.status-bar.pending .dot { background: var(--orange); animation: pulse 1.2s infinite; }
+.status-bar.ok .dot      { background: var(--green); }
+.status-bar.fail .dot    { background: var(--red); }
 
-  /* Device error panels */
-  .device-blocked-panel {
-    background:#fce8e6; border:1px solid #ef9a9a; border-radius:8px; padding:16px; margin-bottom:16px; display:none;
-  }
-  .device-blocked-panel.visible { display:block; }
-  .device-blocked-panel strong { color:var(--red); display:block; margin-bottom:6px; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.2} }
 
-  .device-mismatch-panel {
-    background:#fff3e0; border:1px solid #ffcc80; border-radius:8px; padding:16px; margin-bottom:16px; display:none;
-  }
-  .device-mismatch-panel.visible { display:block; }
-  .device-mismatch-panel strong { color:var(--orange); display:block; margin-bottom:6px; }
+/* ── Form fields ─────────────────────────────────────────── */
+.field { margin-bottom: 18px; }
+.field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  margin-bottom: 6px;
+}
+.field-label .req { color: var(--red); margin-left: 2px; }
 
-  .override-field {
-    background:#fff8e1; border:1px solid #ffe082; border-radius:8px; padding:16px; margin-bottom:16px; display:none;
-  }
-  .override-field.visible { display:block; }
+.input {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 13px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+  background: var(--surface);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+.input.has-error { border-color: var(--red); }
+.input.code-style {
+  font-family: 'DM Mono', monospace;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 8px;
+  text-align: center;
+}
+.field-hint { font-size: 11px; color: var(--ink-4); margin-top: 5px; }
 
-  .progress-bar { background:var(--gray-2); height:4px; border-radius:2px; margin-top:16px; overflow:hidden; }
-  .progress-fill { height:100%; background:var(--purple); border-radius:2px; transition:width .4s ease; width:0%; }
+/* ── Alert ───────────────────────────────────────────────── */
+.alert {
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  display: none;
+}
+.alert.show { display: block; }
+.alert-error  { background: var(--red-light);    border: 1px solid #fecaca; color: #991b1b; }
+.alert-warn   { background: var(--orange-light); border: 1px solid #fde68a; color: #92400e; }
 
-  .question-card { padding:24px; }
-  .question-number { font-size:12px; color:var(--gray-4); font-weight:500; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
-  .question-text { font-size:15px; color:var(--text); margin-bottom:20px; line-height:1.5; }
-  .question-text .req { color:var(--red); margin-left:4px; }
+/* ── Device override panels ──────────────────────────────── */
+.device-panel {
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  display: none;
+  line-height: 1.5;
+}
+.device-panel.show { display: block; }
+.device-panel strong { display: block; font-size: 13px; margin-bottom: 4px; }
+.device-panel.blocked { background: var(--red-light);    border: 1px solid #fecaca; color: #991b1b; }
+.device-panel.mismatch{ background: var(--orange-light); border: 1px solid #fde68a; color: #92400e; }
+.override-box {
+  background: var(--orange-light);
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 14px;
+  display: none;
+}
+.override-box.show { display: block; }
+.override-box .ov-title { font-size: 13px; font-weight: 600; color: #92400e; margin-bottom: 4px; }
+.override-box .ov-hint  { font-size: 12px; color: #b45309; margin-bottom: 10px; line-height: 1.4; }
 
-  .option { display:flex; align-items:center; gap:12px; padding:12px 8px; border-radius:4px; cursor:pointer; margin-bottom:2px; transition:background .1s; }
-  .option:hover { background:var(--gray-1); }
-  .option input[type="radio"] { display:none; }
-  .radio-circle { width:18px; height:18px; border-radius:50%; border:2px solid var(--gray-4); flex-shrink:0; display:flex; align-items:center; justify-content:center; }
-  .radio-dot { width:10px; height:10px; border-radius:50%; background:var(--purple); transform:scale(0); transition:transform .15s; }
-  .option:has(input:checked) .radio-circle { border-color:var(--purple); }
-  .option:has(input:checked) .radio-dot { transform:scale(1); }
-  .option-label { font-size:14px; color:var(--text); }
+/* ── Selfie ──────────────────────────────────────────────── */
+.selfie-zone {
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 18px;
+  background: var(--surface-2);
+  transition: border-color .2s, background .2s;
+}
+.selfie-zone.active { border-color: var(--accent); background: var(--accent-light); border-style: solid; }
+.selfie-zone.done   { border-color: var(--green);  background: var(--green-light);  border-style: solid; }
+.selfie-icon { font-size: 40px; margin-bottom: 8px; }
+.selfie-lede { font-size: 13px; color: var(--ink-3); line-height: 1.4; }
+.selfie-lede strong { display: block; color: var(--ink); font-size: 14px; margin-bottom: 3px; }
+.selfie-preview {
+  width: 100px; height: 100px; border-radius: 50%; object-fit: cover;
+  border: 3px solid var(--accent); margin: 0 auto 10px; display: none;
+}
+.selfie-preview.show { display: block; }
+video#cam-feed {
+  width: 100%; max-width: 300px; height: 220px; border-radius: 8px;
+  object-fit: cover; background: #000; display: none; margin: 0 auto 10px;
+}
+video#cam-feed.show { display: block; }
+canvas#cam-canvas { display: none; }
+.selfie-done-msg { font-size: 13px; font-weight: 500; color: var(--green); display: none; }
+.selfie-done-msg.show { display: block; margin-top: 8px; }
 
-  .question-error { font-size:12px; color:var(--red); margin-top:8px; display:none; }
-  .question-error.visible { display:block; }
+.btn-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
 
-  .form-actions { display:flex; align-items:center; justify-content:space-between; }
-  .clear-link { font-size:14px; color:var(--purple); cursor:pointer; padding:8px; border-radius:4px; }
-  .clear-link:hover { background:var(--purple-light); }
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px; border-radius: 8px; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .15s; letter-spacing: .1px;
+}
+.btn-accent  { background: var(--accent); color: #fff; }
+.btn-accent:hover:not(:disabled) { background: #4338ca; }
+.btn-accent:disabled { background: var(--surface-3); color: var(--ink-4); cursor: not-allowed; }
+.btn-ghost   { background: var(--surface); color: var(--accent); border: 1.5px solid var(--accent); }
+.btn-ghost:hover { background: var(--accent-light); }
+.btn-danger  { background: var(--red); color: #fff; }
+.btn-full    { width: 100%; justify-content: center; padding: 12px; font-size: 14px; }
 
-  .spinner { width:36px; height:36px; border:3px solid var(--gray-2); border-top-color:var(--purple); border-radius:50%; animation:spin .7s linear infinite; margin:0 auto 16px; }
-  @keyframes spin { to{transform:rotate(360deg)} }
-  .loading-card { padding:48px 24px; text-align:center; }
-  .alert { padding:12px 16px; border-radius:6px; font-size:13px; margin-bottom:16px; display:none; line-height:1.5; }
-  .alert.visible { display:block; }
-  .alert-error { background:#fce8e6; color:#c62828; border:1px solid #ef9a9a; }
+/* ── Progress ────────────────────────────────────────────── */
+.progress-wrap { height: 3px; background: var(--surface-3); border-radius: 2px; margin-top: 14px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .4s ease; width: 0%; }
 
-  .result-card { padding:48px 24px; text-align:center; }
-  .result-icon { width:72px; height:72px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 24px; font-size:36px; }
-  .result-icon.pass { background:#e6f4ea; }
-  .result-icon.fail { background:#fce8e6; }
-  .result-title { font-family:'Google Sans',sans-serif; font-size:24px; font-weight:400; margin-bottom:8px; }
-  .result-score { font-size:48px; font-weight:300; color:var(--purple); font-family:'Google Sans',sans-serif; margin:16px 0; }
-  .result-meta { font-size:14px; color:var(--gray-5); margin-bottom:24px; line-height:1.6; }
+/* ── Quiz cards ──────────────────────────────────────────── */
+.q-card { padding: 22px 24px; }
+.q-meta { font-size: 11px; font-weight: 600; color: var(--ink-4); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; }
+.q-text { font-size: 15px; color: var(--ink); margin-bottom: 18px; line-height: 1.55; }
+.q-text .req { color: var(--red); margin-left: 3px; }
 
-  .answer-review { text-align:left; margin-top:24px; border-top:1px solid var(--gray-3); padding-top:24px; }
-  .review-heading { font-family:'Google Sans',sans-serif; font-size:15px; font-weight:500; margin-bottom:16px; }
-  .review-item { margin-bottom:12px; padding:12px; border-radius:8px; }
-  .review-item.correct { background:#e6f4ea; }
-  .review-item.wrong { background:#fce8e6; }
-  .review-q { font-size:13px; font-weight:500; margin-bottom:4px; }
-  .review-a { font-size:13px; color:var(--gray-6); }
-  .review-status { font-size:12px; font-weight:500; margin-top:4px; }
-  .review-item.correct .review-status { color:var(--green); }
-  .review-item.wrong .review-status { color:var(--red); }
+.option {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 12px; border-radius: 8px; cursor: pointer;
+  margin-bottom: 3px; transition: background .1s;
+}
+.option:hover { background: var(--surface-2); }
+.option input[type="radio"] { display: none; }
+.radio-outer {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid var(--ink-4); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .15s;
+}
+.radio-inner {
+  width: 9px; height: 9px; border-radius: 50%; background: var(--accent);
+  transform: scale(0); transition: transform .15s;
+}
+.option:has(input:checked) .radio-outer { border-color: var(--accent); }
+.option:has(input:checked) .radio-inner { transform: scale(1); }
+.option-text { font-size: 14px; color: var(--ink); }
+.q-err { font-size: 12px; color: var(--red); font-weight: 500; margin-top: 6px; display: none; }
+.q-err.show { display: block; }
 
-  .page { display:none; }
-  .page.active { display:block; animation:fadeIn .3s ease; }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
+.form-actions { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; }
+.clear-link { font-size: 13px; color: var(--accent); cursor: pointer; padding: 6px; border-radius: 6px; font-weight: 500; }
+.clear-link:hover { background: var(--accent-light); }
+
+/* ── Loading ─────────────────────────────────────────────── */
+.loading-body { padding: 56px 24px; text-align: center; }
+.spinner {
+  width: 36px; height: 36px; border: 3px solid var(--surface-3);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin .7s linear infinite; margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg) } }
+.loading-msg { font-size: 14px; color: var(--ink-3); }
+
+/* ── Result ──────────────────────────────────────────────── */
+.result-body { padding: 48px 24px; text-align: center; }
+.result-icon { font-size: 56px; margin-bottom: 16px; }
+.result-title { font-size: 22px; font-weight: 600; letter-spacing: -.3px; margin-bottom: 6px; }
+.result-score { font-size: 52px; font-weight: 300; color: var(--accent); letter-spacing: -2px; margin: 16px 0 8px; }
+.result-pct { font-size: 14px; color: var(--ink-3); margin-bottom: 24px; }
+
+.review { text-align: left; border-top: 1px solid var(--border); padding-top: 24px; margin-top: 24px; }
+.review-heading { font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 14px; letter-spacing: .1px; }
+.review-item { padding: 12px; border-radius: 8px; margin-bottom: 8px; }
+.review-item.correct { background: var(--green-light); border: 1px solid #a7f3d0; }
+.review-item.wrong   { background: var(--red-light);   border: 1px solid #fecaca; }
+.review-q { font-size: 13px; font-weight: 500; margin-bottom: 3px; color: var(--ink); }
+.review-a { font-size: 12px; color: var(--ink-2); }
+.review-verdict { font-size: 11px; font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: .4px; }
+.review-item.correct .review-verdict { color: var(--green); }
+.review-item.wrong   .review-verdict { color: var(--red); }
+
+/* ── Pages ───────────────────────────────────────────────── */
+.page { display: none; }
+.page.active { display: block; animation: fadeUp .25s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-icon">
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg>
+<div class="topbar">
+  <div class="topbar-logo">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
   </div>
-  <span class="header-title">Google <span>Forms</span></span>
+  <span class="topbar-name">Class <span>Quiz</span></span>
 </div>
 
-<div class="main">
-  <!-- LOGIN PAGE -->
+<div class="wrap">
+
+  <!-- ───────────── LOGIN PAGE ───────────── -->
   <div class="page active" id="page-login">
-    <div class="card banner-card">
-      <div class="banner-content">
-        <div class="form-title">Class Quiz</div>
-        <div class="form-desc">Sign in with your Student ID. <strong>One student per device only.</strong></div>
-        <div class="required-note">* Required</div>
+    <div class="card card-hero">
+      <div class="hero-body">
+        <div class="hero-title">Class Quiz</div>
+        <div class="hero-sub">Sign in with your Student ID. <strong style="color:var(--ink)">One student per device.</strong></div>
+        <div class="hero-req">* Required</div>
       </div>
     </div>
 
-    <div class="card section">
-      <h2>Sign In to Continue</h2>
-      <p>All fields are required. Your device will be locked to your Student ID.</p>
+    <div class="card">
+      <div class="card-body">
+        <div class="section-label">Sign In</div>
 
-      <!-- GPS -->
-      <div class="gps-block detecting" id="gps-block">
-        <div class="gps-top">
-          <div class="gps-dot"></div>
-          <div class="gps-msg" id="gps-msg">Detecting your location… please wait</div>
+        <!-- GPS status -->
+        <div class="status-bar pending" id="gps-bar">
+          <span class="dot"></span>
+          <span class="msg" id="gps-msg">Detecting location…</span>
+          <button class="retry-btn" id="gps-retry" onclick="retryGPS()" style="display:none">↻ Retry</button>
         </div>
-        <div class="gps-actions" id="gps-actions">
-          <button class="gps-retry-btn" onclick="retryGPS()">↻ Try Again</button>
+
+        <!-- Fingerprint status -->
+        <div class="status-bar pending" id="fp-bar">
+          <span class="dot"></span>
+          <span class="msg" id="fp-msg">Identifying device…</span>
+          <button class="retry-btn" id="fp-retry" onclick="retryFingerprint()" style="display:none">↻ Retry</button>
         </div>
-      </div>
 
-      <!--
-        FIX-D: Device fingerprint status bar.
-        Visible to the student so they know their device is being identified.
-        The Start Quiz button is disabled while state is "computing" or "error".
-        Retry button recalculates the fingerprint (useful if AudioContext was
-        blocked initially and the user grants permission on retry).
-      -->
-      <div class="fp-block computing" id="fp-block">
-        <div class="fp-top">
-          <div class="fp-dot"></div>
-          <div class="fp-msg" id="fp-msg">Identifying device… please wait</div>
+        <div class="alert alert-error" id="login-alert"></div>
+
+        <div class="field">
+          <label class="field-label" for="f-id">Student ID <span class="req">*</span></label>
+          <input class="input" type="text" id="f-id" placeholder="e.g. STU001" autocomplete="off">
         </div>
-        <div class="fp-actions" id="fp-actions">
-          <button class="fp-retry-btn" onclick="retryFingerprint()">↻ Try Again</button>
+
+        <div class="field">
+          <label class="field-label" for="f-name">Full Name <span class="req">*</span></label>
+          <input class="input" type="text" id="f-name" placeholder="Your registered full name">
         </div>
-      </div>
 
-      <div class="alert alert-error" id="login-alert"></div>
+        <div class="field">
+          <label class="field-label" for="f-code">Session Code <span class="req">*</span></label>
+          <input class="input code-style" type="text" id="f-code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="off">
+          <div class="field-hint">6-digit code shown on the board</div>
+        </div>
 
-      <div class="field-group">
-        <label class="field-label" for="student-id">Student ID <span class="req">*</span></label>
-        <input class="text-input" type="text" id="student-id" placeholder="e.g. STU001" autocomplete="off">
-      </div>
+        <!-- Selfie -->
+        <div class="field">
+          <label class="field-label">Identity Selfie <span class="req">*</span></label>
+          <div class="selfie-zone" id="selfie-zone">
+            <img id="selfie-img" class="selfie-preview" alt="Your photo">
+            <video id="cam-feed" autoplay playsinline></video>
+            <canvas id="cam-canvas" width="320" height="240"></canvas>
 
-      <div class="field-group">
-        <label class="field-label" for="student-name">Full Name <span class="req">*</span></label>
-        <input class="text-input" type="text" id="student-name" placeholder="Your registered full name">
-      </div>
-
-      <div class="field-group">
-        <label class="field-label" for="session-code">Session Code <span class="req">*</span></label>
-        <input class="text-input code-input" type="text" id="session-code" placeholder="000000" maxlength="6" autocomplete="off" inputmode="numeric">
-        <div style="font-size:12px;color:var(--gray-4);margin-top:6px">Enter the 6-digit code shown on the board</div>
-      </div>
-
-      <!-- Selfie -->
-      <div class="field-group">
-        <label class="field-label">Identity Selfie <span class="req">*</span></label>
-        <div class="selfie-block" id="selfie-block">
-          <img id="selfie-preview" class="selfie-preview" alt="Your selfie">
-          <video id="selfie-video" autoplay playsinline></video>
-          <canvas id="selfie-canvas" width="320" height="240"></canvas>
-
-          <div id="selfie-idle">
-            <div class="selfie-icon">📷</div>
-            <div class="selfie-label">
-              <strong>Take a selfie to verify your identity</strong>
-              Your photo is saved for lecturer review.
+            <div id="selfie-idle">
+              <div class="selfie-icon">📷</div>
+              <div class="selfie-lede">
+                <strong>Take a selfie to verify your identity</strong>
+                Your photo is saved for lecturer review.
+              </div>
+              <div class="btn-row">
+                <button class="btn btn-accent" onclick="startCamera()">Open Camera</button>
+              </div>
             </div>
-            <button class="selfie-btn" onclick="startCamera()">Open Camera</button>
-          </div>
 
-          <div id="selfie-camera" style="display:none">
-            <div style="margin-bottom:10px;font-size:13px;color:var(--gray-5)">Position your face in the centre, then tap Capture</div>
-            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-              <button class="selfie-btn" onclick="capturePhoto()">📸 Capture</button>
-              <button class="selfie-btn secondary" onclick="cancelCamera()">Cancel</button>
+            <div id="selfie-live" style="display:none">
+              <div class="selfie-lede" style="margin-bottom:10px">Centre your face, then capture.</div>
+              <div class="btn-row">
+                <button class="btn btn-accent" onclick="capturePhoto()">📸 Capture</button>
+                <button class="btn btn-ghost" onclick="cancelCamera()">Cancel</button>
+              </div>
             </div>
-          </div>
 
-          <div id="selfie-confirm" style="display:none">
-            <div style="font-size:13px;color:var(--gray-5);margin-bottom:10px">Looking good? Confirm or retake.</div>
-            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-              <button class="selfie-btn" onclick="confirmPhoto()">✓ Use this photo</button>
-              <button class="selfie-btn secondary" onclick="retakePhoto()">↻ Retake</button>
+            <div id="selfie-confirm" style="display:none">
+              <div class="selfie-lede" style="margin-bottom:10px">Happy with the photo?</div>
+              <div class="btn-row">
+                <button class="btn btn-accent" onclick="confirmPhoto()">✓ Use this</button>
+                <button class="btn btn-ghost" onclick="retakePhoto()">↻ Retake</button>
+              </div>
             </div>
-          </div>
 
-          <div class="selfie-status" id="selfie-status">✅ Photo captured — identity verified</div>
+            <div class="selfie-done-msg" id="selfie-ok">✅ Photo captured — identity confirmed</div>
+          </div>
         </div>
-      </div>
 
-      <!-- Panel 1: Device owned by another student — hard block, no override -->
-      <div class="device-blocked-panel" id="device-blocked-panel">
-        <strong>⛔ Device Already In Use by Another Student</strong>
-        This device has already been registered to a different student today.
-        Each student must use their own device. Borrowing another student's device is not permitted.
-        <br><small style="color:var(--gray-5);margin-top:6px;display:block">If you believe this is an error, please speak to your lecturer.</small>
-      </div>
+        <!-- Device error panels -->
+        <div class="device-panel blocked" id="panel-blocked">
+          <strong>⛔ Device Registered to Another Student</strong>
+          This device is already claimed by a different student today. Each student must use their own device. Speak to your lecturer if you believe this is an error.
+        </div>
 
-      <!-- Panel 2: Same student, different device — override needed -->
-      <div class="device-mismatch-panel" id="device-mismatch-panel">
-        <strong>⚠️ Different Device Detected</strong>
-        You have already logged in today on a different device. Only one device per student is allowed per session.
-        <br>Ask your lecturer for a one-time override code if you need to switch devices.
-      </div>
+        <div class="device-panel mismatch" id="panel-mismatch">
+          <strong>⚠️ Different Device Detected</strong>
+          You already logged in today on a different device. Ask your lecturer for a one-time override code to continue.
+        </div>
 
-      <!-- Override entry — only for mismatch / check_failed, never for device_in_use -->
-      <div class="override-field" id="override-field">
-        <div style="font-weight:500;margin-bottom:4px;color:#7a5800">🔓 Lecturer Override Code</div>
-        <div style="font-size:13px;color:var(--gray-5);margin-bottom:12px;line-height:1.5">Enter the 6-digit code your lecturer gave you verbally. It is single-use and expires in 10 minutes.</div>
-        <label class="field-label" for="override-code">Override Code <span class="req">*</span></label>
-        <input class="text-input code-input" type="text" id="override-code" placeholder="000000" maxlength="6" autocomplete="off" inputmode="numeric">
-      </div>
+        <!-- Override entry -->
+        <div class="override-box" id="override-box">
+          <div class="ov-title">🔓 Lecturer Override Code</div>
+          <div class="ov-hint">Enter the 6-digit code from your lecturer. Single-use, expires in 10 minutes.</div>
+          <div class="field">
+            <label class="field-label" for="f-override">Override Code <span class="req">*</span></label>
+            <input class="input code-style" type="text" id="f-override" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="off">
+          </div>
+        </div>
 
-      <button class="btn btn-primary" id="login-btn" onclick="handleLogin()" style="width:100%;justify-content:center;" disabled>
-        Identifying device…
-      </button>
+        <button class="btn btn-accent btn-full" id="login-btn" onclick="handleLogin()" disabled>
+          Identifying device…
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- LOADING -->
+  <!-- ───────────── LOADING PAGE ───────────── -->
   <div class="page" id="page-loading">
-    <div class="card banner-card"><div class="banner-content"><div class="form-title">Class Quiz</div></div></div>
-    <div class="card loading-card">
-      <div class="spinner"></div>
-      <p id="loading-msg">Loading your quiz…</p>
+    <div class="card card-hero"><div class="hero-body"><div class="hero-title">Class Quiz</div></div></div>
+    <div class="card">
+      <div class="loading-body">
+        <div class="spinner"></div>
+        <div class="loading-msg" id="loading-msg">Loading your quiz…</div>
+      </div>
     </div>
   </div>
 
-  <!-- QUIZ -->
+  <!-- ───────────── QUIZ PAGE ───────────── -->
   <div class="page" id="page-quiz">
-    <div class="card banner-card">
-      <div class="banner-content">
-        <div class="form-title">Class Quiz</div>
-        <div class="form-desc" id="quiz-welcome"></div>
-        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="card card-hero">
+      <div class="hero-body">
+        <div class="hero-title">Class Quiz</div>
+        <div class="hero-sub" id="quiz-welcome"></div>
+        <div class="progress-wrap"><div class="progress-fill" id="progress-fill"></div></div>
       </div>
     </div>
-    <div id="questions-container"></div>
-    <div class="card section">
-      <div class="alert alert-error" id="submit-alert"></div>
+    <div id="questions-wrap"></div>
+    <div class="card">
+      <div class="alert alert-error" id="submit-alert" style="margin:16px 24px 0;"></div>
       <div class="form-actions">
         <span class="clear-link" onclick="clearForm()">Clear form</span>
-        <button class="btn btn-submit" id="submit-btn" onclick="handleSubmit()">Submit</button>
+        <button class="btn btn-accent" id="submit-btn" onclick="handleSubmit()">Submit</button>
       </div>
     </div>
   </div>
 
-  <!-- RESULT -->
+  <!-- ───────────── RESULT PAGE ───────────── -->
   <div class="page" id="page-result">
-    <div class="card banner-card"><div class="banner-content"><div class="form-title">Your Results</div></div></div>
-    <div class="card"><div class="result-card" id="result-content"></div></div>
+    <div class="card card-hero"><div class="hero-body"><div class="hero-title">Your Results</div></div></div>
+    <div class="card"><div class="result-body" id="result-body"></div></div>
   </div>
-</div>
+
+</div><!-- /wrap -->
 
 <script>
-// ====================== CONFIG ======================
+// ═══════════════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════════════
 const API_URL = "https://script.google.com/macros/s/AKfycbwgxgBy6zDZsoZFEtguhNJR-Pt9fg7N7zKOyrJmzwKaXVb8vcA3E901UIKIO3uD5nYXZg/exec";
 
-// ====================== STATE ======================
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
 let currentUser = null;
-let quizQuestions = [];
-let answers = {};
-let submitted = false;
+let quizQuestions = [], answers = {}, submitted = false;
 let userLat = null, userLng = null, gpsReady = false;
-let selfieDataUrl = null, selfieConfirmed = false, cameraStream = null;
-let gpsWatcher = null, gpsAttempt = 0;
+let selfieData = null, selfieOk = false, camStream = null;
+let fpValue = null, fpState = "computing"; // "computing" | "ready" | "error"
 
-// FIX-D: fingerprint state is explicit — never silently null
-// fpValue  = the computed SHA-256 hex string (once ready)
-// fpState  = "computing" | "ready" | "error"
-let fpValue = null;
-let fpState = "computing";
-
-// ====================== FINGERPRINT (FIX-D) ======================
+// ═══════════════════════════════════════════════════════════
+//  FINGERPRINT
 //
-// Changes vs original:
-//  1. The function now THROWS on failure instead of returning "".
-//     Any signal that fails (canvas, WebGL, AudioContext) logs a warning
-//     and contributes an empty string to the hash — the hash still works.
-//     But if the ENTIRE hash computation fails (e.g. SubtleCrypto missing),
-//     the error is surfaced to the UI rather than silently passed as "".
-//  2. setFpStatus() updates the visible status bar and enables/disables
-//     the Start Quiz button accordingly.
-//  3. computeFingerprint() is called automatically on page load AND can
-//     be retried by the user via the "Try Again" button.
-//
-async function getFingerprint() {
+//  PERFORMANCE CHANGES:
+//  1. Cached in sessionStorage — a page refresh reuses the
+//     cached value instantly (< 1 ms) instead of rerunning
+//     the AudioContext render (up to 1-2 s).
+//  2. All sub-signals (canvas, WebGL, audio, hardware) still
+//     contribute; any individual failure is non-fatal.
+//  3. setFpState() is the single source of truth for the
+//     button label and enabled state.
+// ═══════════════════════════════════════════════════════════
+const FP_CACHE_KEY = "quiz_fp_v1";
 
-  // ── 1. Canvas fingerprint ──────────────────────────────
-  let canvasFp = '';
+async function computeFingerprint() {
+  // Try cache first — instant on refresh
   try {
-    const cvs = document.createElement('canvas');
-    cvs.width = 200; cvs.height = 50;
-    const ctx = cvs.getContext('2d');
-    const grad = ctx.createLinearGradient(0, 0, 200, 0);
-    grad.addColorStop(0,   'rgb(255,0,128)');
-    grad.addColorStop(0.5, 'rgb(0,255,128)');
-    grad.addColorStop(1,   'rgb(0,128,255)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 200, 50);
-    ctx.globalAlpha = 0.6;
-    ctx.fillStyle = 'rgba(102,204,0,0.7)';
+    const cached = sessionStorage.getItem(FP_CACHE_KEY);
+    if (cached && cached.length >= 32) {
+      fpValue = cached;
+      setFpState("ready", "Device identified ✓");
+      return;
+    }
+  } catch (_) {}
+
+  setFpState("computing", "Identifying device…");
+
+  try {
+    fpValue = await _buildFingerprint();
+    if (!fpValue || fpValue.length < 32) throw new Error("hash too short");
+
+    try { sessionStorage.setItem(FP_CACHE_KEY, fpValue); } catch (_) {}
+    setFpState("ready", "Device identified ✓");
+  } catch (e) {
+    fpValue = null;
+    console.error("Fingerprint error:", e);
+    setFpState("error",
+      "Could not identify device — use Chrome/Safari on HTTPS, disable ad-blockers, then tap Retry.");
+  }
+}
+
+async function _buildFingerprint() {
+  // Canvas
+  let cvsFp = "";
+  try {
+    const c = document.createElement("canvas");
+    c.width = 200; c.height = 50;
+    const ctx = c.getContext("2d");
+    const g = ctx.createLinearGradient(0, 0, 200, 0);
+    g.addColorStop(0, "rgb(255,0,128)");
+    g.addColorStop(.5, "rgb(0,255,128)");
+    g.addColorStop(1, "rgb(0,128,255)");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, 200, 50);
+    ctx.globalAlpha = .6; ctx.fillStyle = "rgba(102,204,0,.7)";
     ctx.beginPath(); ctx.arc(50, 25, 20, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = 'rgba(255,165,0,0.5)';
-    ctx.fillRect(80, 5, 60, 40);
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = '#1a1a2e';
-    ctx.font = '11px Arial, sans-serif';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText('Cwm fjord veg balks nth px', 2.3, 33.7);
-    ctx.font = 'italic bold 13px Georgia, serif';
-    ctx.fillStyle = 'rgba(30,120,200,0.9)';
-    ctx.fillText('\u0041\u03B1\u4E2D\u0627\u05D0', 100, 20);
-    canvasFp = cvs.toDataURL();
-  } catch (e) {
-    console.warn('Canvas fingerprint failed (non-fatal):', e.message);
-  }
+    ctx.globalAlpha = 1; ctx.fillStyle = "#1a1a2e";
+    ctx.font = "11px Arial"; ctx.fillText("Cwm fjord veg balks nth px", 2, 33);
+    cvsFp = c.toDataURL();
+  } catch (_) {}
 
-  // ── 2. WebGL renderer string ───────────────────────────
-  let webglFp = '';
+  // WebGL
+  let glFp = "";
   try {
-    const gl = document.createElement('canvas').getContext('webgl') ||
-               document.createElement('canvas').getContext('experimental-webgl');
+    const gl = document.createElement("canvas").getContext("webgl") ||
+               document.createElement("canvas").getContext("experimental-webgl");
     if (gl) {
-      const dbgInfo = gl.getExtension('WEBGL_debug_renderer_info');
-      webglFp = dbgInfo
-        ? [gl.getParameter(dbgInfo.UNMASKED_VENDOR_WEBGL),
-           gl.getParameter(dbgInfo.UNMASKED_RENDERER_WEBGL)].join('|')
-        : gl.getParameter(gl.RENDERER) + '|' + gl.getParameter(gl.VENDOR);
+      const ext = gl.getExtension("WEBGL_debug_renderer_info");
+      glFp = ext
+        ? [gl.getParameter(ext.UNMASKED_VENDOR_WEBGL), gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)].join("|")
+        : gl.getParameter(gl.RENDERER) + "|" + gl.getParameter(gl.VENDOR);
     }
-  } catch (e) {
-    console.warn('WebGL fingerprint failed (non-fatal):', e.message);
-  }
+  } catch (_) {}
 
-  // ── 3. Audio context fingerprint ──────────────────────
-  let audioFp = '';
+  // AudioContext (the slow part — runs async in parallel with page load)
+  let audioFp = "";
   try {
-    const AudioCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-    if (AudioCtx) {
-      const actx = new AudioCtx(1, 4096, 44100);
-      const osc  = actx.createOscillator();
-      const comp = actx.createDynamicsCompressor();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(10000, actx.currentTime);
-      comp.threshold.setValueAtTime(-50, actx.currentTime);
-      comp.knee.setValueAtTime(40,       actx.currentTime);
-      comp.ratio.setValueAtTime(12,      actx.currentTime);
-      comp.attack.setValueAtTime(0,      actx.currentTime);
-      comp.release.setValueAtTime(0.25,  actx.currentTime);
-      osc.connect(comp);
-      comp.connect(actx.destination);
-      osc.start(0);
-      const buf  = await actx.startRendering();
+    const AC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (AC) {
+      const ctx = new AC(1, 4096, 44100);
+      const osc = ctx.createOscillator();
+      const cmp = ctx.createDynamicsCompressor();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(10000, ctx.currentTime);
+      cmp.threshold.setValueAtTime(-50, ctx.currentTime);
+      cmp.knee.setValueAtTime(40, ctx.currentTime);
+      cmp.ratio.setValueAtTime(12, ctx.currentTime);
+      cmp.attack.setValueAtTime(0, ctx.currentTime);
+      cmp.release.setValueAtTime(.25, ctx.currentTime);
+      osc.connect(cmp); cmp.connect(ctx.destination); osc.start(0);
+      const buf  = await ctx.startRendering();
       const data = buf.getChannelData(0);
-      let sum = 0;
-      for (let i = 4500; i < 5000; i++) sum += Math.abs(data[i]);
-      audioFp = sum.toString();
+      let s = 0;
+      for (let i = 4500; i < 5000; i++) s += Math.abs(data[i]);
+      audioFp = s.toString();
     }
-  } catch (e) {
-    console.warn('Audio fingerprint failed (non-fatal):', e.message);
-  }
+  } catch (_) {}
 
-  // ── 4. Hardware & browser signals ─────────────────────
+  // Hardware signals
   const hw = [
     navigator.userAgent,
     navigator.language,
-    navigator.languages ? navigator.languages.join(',') : '',
-    navigator.platform || '',
-    screen.width  + 'x' + screen.height,
-    screen.availWidth + 'x' + screen.availHeight,
+    (navigator.languages || []).join(","),
+    navigator.platform || "",
+    screen.width + "x" + screen.height,
+    screen.availWidth + "x" + screen.availHeight,
     screen.colorDepth,
     (window.devicePixelRatio || 1).toFixed(3),
-    navigator.hardwareConcurrency || '',
-    navigator.deviceMemory || '',
+    navigator.hardwareConcurrency || "",
+    navigator.deviceMemory || "",
     new Date().getTimezoneOffset(),
-    Intl.DateTimeFormat().resolvedOptions().timeZone || ''
-  ].join('|');
+    Intl.DateTimeFormat().resolvedOptions().timeZone || ""
+  ].join("|");
 
-  // ── Hash ───────────────────────────────────────────────
-  // If SubtleCrypto is unavailable (e.g. non-HTTPS), throw so the caller
-  // surfaces the error rather than sending an empty fingerprint.
-  if (!crypto || !crypto.subtle) {
-    throw new Error('SubtleCrypto not available — please use HTTPS');
-  }
+  if (!crypto?.subtle) throw new Error("SubtleCrypto unavailable — HTTPS required");
 
-  const raw    = [canvasFp, webglFp, audioFp, hw].join('||');
-  const buf    = new TextEncoder().encode(raw);
-  const hashBuf = await crypto.subtle.digest('SHA-256', buf);
-  const hash   = Array.from(new Uint8Array(hashBuf))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-
-  // Final guard: an all-zero hash or very short hash means something went
-  // deeply wrong. We don't want to submit it as a valid fingerprint.
-  if (!hash || hash.length < 32) {
-    throw new Error('Fingerprint hash is invalid');
-  }
-
-  return hash;
+  const raw = [cvsFp, glFp, audioFp, hw].join("||");
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-// FIX-D: Wrap fingerprint computation in explicit state management.
-function setFpStatus(state, msg) {
+function setFpState(state, msg) {
   fpState = state;
-  const block = document.getElementById('fp-block');
-  block.className = 'fp-block ' + (state === 'error' ? 'fp-error' : state);
-  document.getElementById('fp-msg').textContent = msg;
-  document.getElementById('fp-actions').classList.toggle('visible', state === 'error');
-
-  // Enable the login button only when BOTH fingerprint AND GPS are ready.
-  updateLoginBtn();
-}
-
-function updateLoginBtn() {
-  const btn = document.getElementById('login-btn');
-  if (fpState === 'ready') {
-    btn.disabled = false;
-    btn.textContent = 'Start Quiz';
-  } else if (fpState === 'error') {
-    btn.disabled = true;
-    btn.textContent = 'Device identification failed — see above';
-  } else {
-    btn.disabled = true;
-    btn.textContent = 'Identifying device…';
-  }
-}
-
-async function computeFingerprint() {
-  setFpStatus('computing', 'Identifying device… please wait');
-  try {
-    fpValue = await getFingerprint();
-    setFpStatus('ready', 'Device identified ✓ — ready to start');
-    console.log('Fingerprint ready:', fpValue.substring(0, 16) + '…');
-  } catch (e) {
-    fpValue = null;
-    console.error('Fingerprint computation failed:', e);
-    setFpStatus('error',
-      'Could not identify this device. ' +
-      'Try Chrome or Safari, ensure you are on HTTPS, ' +
-      'and disable ad-blockers. Then tap "Try Again".'
-    );
-  }
+  const bar = document.getElementById("fp-bar");
+  bar.className = "status-bar " + (state === "ready" ? "ok" : state === "error" ? "fail" : "pending");
+  document.getElementById("fp-msg").textContent = msg;
+  document.getElementById("fp-retry").style.display = state === "error" ? "inline-flex" : "none";
+  _updateLoginBtn();
 }
 
 function retryFingerprint() {
+  try { sessionStorage.removeItem(FP_CACHE_KEY); } catch (_) {}
   fpValue = null;
   computeFingerprint();
 }
 
-// ====================== GPS ======================
+// ═══════════════════════════════════════════════════════════
+//  GPS
+//
+//  PERFORMANCE CHANGES:
+//  Fire two geolocation requests simultaneously:
+//   • Low-accuracy (faster, no GPS chip): timeout 5s
+//   • High-accuracy (slower but precise): timeout 20s
+//  Whichever resolves first wins. This typically cuts the
+//  GPS wait from 8-15 s down to 1-3 s on most devices.
+// ═══════════════════════════════════════════════════════════
+let gpsWatcher = null;
+
 function initGPS() {
-  if (!navigator.geolocation) return setGpsStatus('fail', 'GPS not supported');
-  requestGPS();
+  if (!navigator.geolocation) {
+    setGpsState("fail", "GPS not supported by this browser");
+    return;
+  }
+  _startGPS();
 }
 
-function requestGPS() {
-  gpsAttempt++;
-  setGpsStatus('detecting', `Detecting location… (attempt ${gpsAttempt})`);
+function _startGPS() {
+  setGpsState("pending", "Detecting location…");
 
-  navigator.geolocation.getCurrentPosition(onGPSSuccess, () => {
-    setGpsStatus('detecting', 'Still trying…');
-    gpsWatcher = navigator.geolocation.watchPosition(onGPSSuccess, onGPSError,
-      { enableHighAccuracy: true, timeout: 30000 });
-  }, { enableHighAccuracy: false, timeout: 8000 });
+  // Fast attempt: low accuracy (network-based, resolves in ~1 s)
+  navigator.geolocation.getCurrentPosition(
+    pos => _onGPSSuccess(pos, false),
+    () => {},  // Silently ignore; high-accuracy attempt still running
+    { enableHighAccuracy: false, timeout: 5000, maximumAge: 30000 }
+  );
+
+  // Precise attempt: GPS chip (used if it wins the race)
+  gpsWatcher = navigator.geolocation.watchPosition(
+    pos => _onGPSSuccess(pos, true),
+    err => {
+      if (!gpsReady) {
+        const msg = { 1: "Location permission denied", 2: "GPS is off", 3: "Timed out" }[err.code] || "Location error";
+        setGpsState("fail", msg + " — tap Retry");
+      }
+    },
+    { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+  );
 }
 
-function onGPSSuccess(pos) {
+function _onGPSSuccess(pos, highAcc) {
+  if (highAcc && gpsWatcher) {
+    navigator.geolocation.clearWatch(gpsWatcher);
+    gpsWatcher = null;
+  }
   userLat = pos.coords.latitude;
   userLng = pos.coords.longitude;
-  gpsReady = true;
-  setGpsStatus('ok', `Location ready (±${Math.round(pos.coords.accuracy)}m)`);
-}
-
-function onGPSError(err) {
-  const msg = {1:'Permission denied', 2:'GPS turned off', 3:'Timed out'}[err.code] || 'Location error';
-  setGpsStatus('fail', msg);
+  if (!gpsReady) {  // Only update state if this is the first success
+    gpsReady = true;
+    const acc = Math.round(pos.coords.accuracy);
+    setGpsState("ok", `Location ready (±${acc} m)`);
+  }
 }
 
 function retryGPS() {
+  if (gpsWatcher) { navigator.geolocation.clearWatch(gpsWatcher); gpsWatcher = null; }
   gpsReady = false;
-  requestGPS();
+  _startGPS();
 }
 
-function setGpsStatus(type, msg) {
-  const block = document.getElementById('gps-block');
-  block.className = `gps-block ${type}`;
-  document.getElementById('gps-msg').textContent = msg;
-  document.getElementById('gps-actions').classList.toggle('visible', type === 'fail');
+function setGpsState(state, msg) {
+  const bar = document.getElementById("gps-bar");
+  bar.className = "status-bar " + (state === "ok" ? "ok" : state === "fail" ? "fail" : "pending");
+  document.getElementById("gps-msg").textContent = msg;
+  document.getElementById("gps-retry").style.display = state === "fail" ? "inline-flex" : "none";
 }
 
-// ====================== SELFIE ======================
+// ═══════════════════════════════════════════════════════════
+//  LOGIN BUTTON STATE
+// ═══════════════════════════════════════════════════════════
+function _updateLoginBtn() {
+  const btn = document.getElementById("login-btn");
+  if (fpState === "ready") {
+    btn.disabled = false;
+    btn.textContent = "Start Quiz";
+  } else if (fpState === "error") {
+    btn.disabled = true;
+    btn.textContent = "Device identification failed — see above";
+  } else {
+    btn.disabled = true;
+    btn.textContent = "Identifying device…";
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SELFIE / CAMERA
+// ═══════════════════════════════════════════════════════════
 async function startCamera() {
   try {
-    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-    const video = document.getElementById('selfie-video');
-    video.srcObject = cameraStream;
-    video.classList.add('visible');
-    document.getElementById('selfie-idle').style.display = 'none';
-    document.getElementById('selfie-camera').style.display = 'block';
-    document.getElementById('selfie-block').classList.add('active');
-  } catch(e) {
-    showAlert(document.getElementById('login-alert'), 'Camera permission denied.');
+    camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+    const v = document.getElementById("cam-feed");
+    v.srcObject = camStream;
+    v.classList.add("show");
+    document.getElementById("selfie-idle").style.display = "none";
+    document.getElementById("selfie-live").style.display = "block";
+    document.getElementById("selfie-zone").classList.add("active");
+  } catch {
+    showAlert("login-alert", "error", "Camera permission denied.");
   }
 }
 
 function capturePhoto() {
-  const video  = document.getElementById('selfie-video');
-  const canvas = document.getElementById('selfie-canvas');
-  canvas.width  = video.videoWidth  || 320;
-  canvas.height = video.videoHeight || 240;
-  canvas.getContext('2d').drawImage(video, 0, 0);
-  selfieDataUrl = canvas.toDataURL('image/jpeg', 0.75);
-  document.getElementById('selfie-preview').src = selfieDataUrl;
-  document.getElementById('selfie-preview').classList.add('visible');
-  document.getElementById('selfie-video').classList.remove('visible');
-  document.getElementById('selfie-camera').style.display = 'none';
-  document.getElementById('selfie-confirm').style.display = 'block';
+  const v = document.getElementById("cam-feed");
+  const c = document.getElementById("cam-canvas");
+  c.width = v.videoWidth || 320; c.height = v.videoHeight || 240;
+  c.getContext("2d").drawImage(v, 0, 0);
+  selfieData = c.toDataURL("image/jpeg", 0.75);
+  document.getElementById("selfie-img").src = selfieData;
+  document.getElementById("selfie-img").classList.add("show");
+  v.classList.remove("show");
+  document.getElementById("selfie-live").style.display = "none";
+  document.getElementById("selfie-confirm").style.display = "block";
 }
 
 function confirmPhoto() {
-  selfieConfirmed = true;
-  stopCamera();
-  document.getElementById('selfie-confirm').style.display = 'none';
-  document.getElementById('selfie-status').classList.add('visible');
-  document.getElementById('selfie-block').classList.remove('active');
-  document.getElementById('selfie-block').classList.add('done');
+  selfieOk = true;
+  _stopCamera();
+  document.getElementById("selfie-confirm").style.display = "none";
+  document.getElementById("selfie-ok").classList.add("show");
+  const zone = document.getElementById("selfie-zone");
+  zone.classList.remove("active"); zone.classList.add("done");
 }
 
 function retakePhoto() {
-  selfieDataUrl = null; selfieConfirmed = false;
-  document.getElementById('selfie-preview').classList.remove('visible');
-  document.getElementById('selfie-confirm').style.display = 'none';
-  document.getElementById('selfie-video').classList.add('visible');
-  document.getElementById('selfie-camera').style.display = 'block';
+  selfieData = null; selfieOk = false;
+  document.getElementById("selfie-img").classList.remove("show");
+  document.getElementById("selfie-confirm").style.display = "none";
+  document.getElementById("cam-feed").classList.add("show");
+  document.getElementById("selfie-live").style.display = "block";
 }
 
 function cancelCamera() {
-  stopCamera();
-  document.getElementById('selfie-video').classList.remove('visible');
-  document.getElementById('selfie-camera').style.display = 'none';
-  document.getElementById('selfie-idle').style.display = 'block';
-  document.getElementById('selfie-block').classList.remove('active');
+  _stopCamera();
+  document.getElementById("cam-feed").classList.remove("show");
+  document.getElementById("selfie-live").style.display = "none";
+  document.getElementById("selfie-idle").style.display = "block";
+  document.getElementById("selfie-zone").classList.remove("active");
 }
 
-function stopCamera() {
-  if (cameraStream) {
-    cameraStream.getTracks().forEach(t => t.stop());
-    cameraStream = null;
-  }
+function _stopCamera() {
+  if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
 }
 
-// ====================== API ======================
-async function post(action, payload = {}) {
+// ═══════════════════════════════════════════════════════════
+//  API
+// ═══════════════════════════════════════════════════════════
+async function api(action, payload = {}) {
   const r = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({ action, ...payload })
   });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   return r.json();
 }
 
-// ====================== RESET UI helpers ======================
-function resetDevicePanels() {
-  document.getElementById('device-blocked-panel').classList.remove('visible');
-  document.getElementById('device-mismatch-panel').classList.remove('visible');
-  document.getElementById('override-field').classList.remove('visible');
+// ═══════════════════════════════════════════════════════════
+//  LOGIN HANDLER
+// ═══════════════════════════════════════════════════════════
+function _resetPanels() {
+  ["panel-blocked", "panel-mismatch"].forEach(id => document.getElementById(id).classList.remove("show"));
+  document.getElementById("override-box").classList.remove("show");
 }
 
-// ====================== LOGIN ======================
 async function handleLogin() {
-  const id           = document.getElementById('student-id').value.trim().toUpperCase();
-  const name         = document.getElementById('student-name').value.trim();
-  const code         = document.getElementById('session-code').value.trim();
-  const overrideCode = document.getElementById('override-code').value.trim() || null;
-  const alertEl      = document.getElementById('login-alert');
+  const id     = document.getElementById("f-id").value.trim().toUpperCase();
+  const name   = document.getElementById("f-name").value.trim();
+  const code   = document.getElementById("f-code").value.trim();
+  const ovEl   = document.getElementById("f-override");
+  const ov     = ovEl ? ovEl.value.trim() || null : null;
 
-  alertEl.classList.remove('visible');
-  resetDevicePanels();
-  ['student-id','student-name','session-code','override-code'].forEach(f => {
-    const el = document.getElementById(f);
-    if (el) el.classList.remove('error');
+  _resetPanels();
+  hideAlert("login-alert");
+  ["f-id","f-name","f-code","f-override"].forEach(fid => {
+    const el = document.getElementById(fid); if (el) el.classList.remove("has-error");
   });
 
-  if (!id || !name || !code) return showAlert(alertEl, 'Please fill all required fields.');
-  if (code.length !== 6 || !/^\d+$/.test(code)) {
-    document.getElementById('session-code').classList.add('error');
-    return showAlert(alertEl, 'Session code must be 6 digits.');
+  if (!id || !name || !code) return showAlert("login-alert", "error", "Please fill all required fields.");
+  if (!/^\d{6}$/.test(code)) {
+    document.getElementById("f-code").classList.add("has-error");
+    return showAlert("login-alert", "error", "Session code must be exactly 6 digits.");
   }
-  if (!selfieConfirmed) return showAlert(alertEl, 'Please take a selfie.');
-  if (!gpsReady)        return showAlert(alertEl, 'Location is not ready yet. Please wait or tap Try Again.');
+  if (!selfieOk)   return showAlert("login-alert", "error", "Please take a selfie first.");
+  if (!gpsReady)   return showAlert("login-alert", "error", "Location not ready — wait a moment or tap Retry.");
+  if (fpState !== "ready" || !fpValue)
+    return showAlert("login-alert", "error", "Device identification not ready — see status bar above.");
 
-  if (fpState !== 'ready' || !fpValue) {
-    return showAlert(alertEl,
-      'Device identification is not ready. ' +
-      'Please wait, or tap "Try Again" in the device status bar above.'
-    );
-  }
+  const btn = document.getElementById("login-btn");
+  btn.disabled = true; btn.textContent = "Verifying…";
 
-  const btn = document.getElementById('login-btn');
-  btn.disabled = true;
-  btn.textContent = 'Verifying…';
-
-  let success = false;
-
-  // Auto-retry up to 4 times for busy server or connection errors
   let d = null;
-  let attempts = 0;
-  const maxAttempts = 4;
+  const MAX = 4;
 
-  while (attempts < maxAttempts) {
-    attempts++;
+  for (let attempt = 1; attempt <= MAX; attempt++) {
     try {
-      const payload = { 
-        id, name, code, 
-        lat: userLat, lng: userLng, 
-        fingerprint: fpValue, 
-        selfie: selfieDataUrl 
-      };
-      if (overrideCode) payload.overrideCode = overrideCode;
+      const payload = { id, name, code, lat: userLat, lng: userLng, fingerprint: fpValue, selfie: selfieData };
+      if (ov) payload.overrideCode = ov;
+      d = await api("login", payload);
 
-      d = await post('login', payload);
-
-      if (!d.ok && d.error === 'device_check_failed' && 
-          d.message && d.message.includes('busy')) {
-        if (attempts < maxAttempts) {
-          btn.textContent = `Server busy — retrying (${attempts}/${maxAttempts})…`;
-          await new Promise(r => setTimeout(r, 3000));
-          continue;
-        }
-      }
-      break;
-
-    } catch(e) {
-      if (attempts < maxAttempts) {
-        btn.textContent = `Connection error — retrying (${attempts}/${maxAttempts})…`;
-        await new Promise(r => setTimeout(r, 3000));
+      // Retry only on "server busy"
+      if (!d.ok && d.error === "device_check_failed" && attempt < MAX &&
+          d.message && d.message.includes("busy")) {
+        btn.textContent = `Server busy — retrying (${attempt}/${MAX})…`;
+        await _sleep(2500);
         continue;
       }
-      showAlert(alertEl, 'Connection error after ' + maxAttempts + ' attempts: ' + e.message);
-      btn.disabled = false;
-      btn.textContent = 'Start Quiz';
+      break;
+    } catch (e) {
+      if (attempt < MAX) {
+        btn.textContent = `Connection error — retrying (${attempt}/${MAX})…`;
+        await _sleep(2500);
+        continue;
+      }
+      showAlert("login-alert", "error", "Connection error after " + MAX + " attempts: " + e.message);
+      btn.disabled = false; btn.textContent = "Start Quiz";
       return;
     }
   }
 
-    if (d.ok) {
-      success = true;
-      currentUser = { id, name: d.name || name, dept: d.dept };
-      stopCamera();
-      showPage('page-loading');
-      await loadQuestions();
-
-    } else {
-
-      switch (d.error) {
-
-        case "device_in_use":
-          document.getElementById('device-blocked-panel').classList.add('visible');
-          document.getElementById('override-field').classList.add('visible');
-          showAlert(alertEl, d.message || "This device is already registered to another student.");
-          break;
-
-        case "student_device_mismatch":
-          document.getElementById('device-mismatch-panel').classList.add('visible');
-          document.getElementById('override-field').classList.add('visible');
-          showAlert(alertEl, d.message || "Different device detected. Enter your override code below.");
-          break;
-
-        case "device_check_failed":
-          document.getElementById('override-field').classList.add('visible');
-          showAlert(alertEl, d.message || "Device verification failed. Ask your lecturer for an override code if this persists.");
-          break;
-
-        case "override_used":
-          showAlert(alertEl, "This override code has already been used. Ask your lecturer for a new one.");
-          break;
-
-        case "override_expired":
-          showAlert(alertEl, "This override code has expired. Ask your lecturer for a new one.");
-          break;
-
-        case "override_invalid":
-          document.getElementById('override-code').classList.add('error');
-          showAlert(alertEl, "Override code is invalid. Please check it and try again.");
-          break;
-
-        case "id_not_found":
-          document.getElementById('student-id').classList.add('error');
-          showAlert(alertEl, "Student ID not registered. Check your ID and try again.");
-          break;
-
-        case "name_mismatch":
-          document.getElementById('student-name').classList.add('error');
-          showAlert(alertEl, "Name does not match the registered Student ID.");
-          break;
-
-        case "already_submitted":
-          showAlert(alertEl, "You have already submitted this quiz.");
-          break;
-
-        case "invalid_code":
-        case "session_expired":
-          document.getElementById('session-code').classList.add('error');
-          showAlert(alertEl, "Invalid or expired session code. Check the board and try again.");
-          break;
-
-        case "location_fail":
-          showAlert(alertEl, `You appear to be outside the classroom (${d.distance || '?'}m away, limit is ${d.allowed || '?'}m). Make sure location services are on.`);
-          break;
-
-        default:
-          showAlert(alertEl, d.message || "Login failed. Please try again.");
-      }
-    }
-
-  if (!success) {
-    btn.disabled = false;
-    btn.textContent = 'Start Quiz';
+  if (d.ok) {
+    currentUser = { id, name: d.name || name, dept: d.dept };
+    _stopCamera();
+    showPage("page-loading");
+    await loadQuestions();
+    return;
   }
+
+  // Error routing
+  switch (d.error) {
+    case "device_in_use":
+      document.getElementById("panel-blocked").classList.add("show");
+      document.getElementById("override-box").classList.add("show");
+      showAlert("login-alert", "error", d.message || "Device registered to another student.");
+      break;
+    case "student_device_mismatch":
+      document.getElementById("panel-mismatch").classList.add("show");
+      document.getElementById("override-box").classList.add("show");
+      showAlert("login-alert", "error", d.message || "Different device detected. Enter override code below.");
+      break;
+    case "device_check_failed":
+      document.getElementById("override-box").classList.add("show");
+      showAlert("login-alert", "error", d.message || "Device check failed. Ask your lecturer for an override code.");
+      break;
+    case "override_used":
+      showAlert("login-alert", "error", "Override code already used. Ask your lecturer for a new one.");
+      break;
+    case "override_expired":
+      showAlert("login-alert", "error", "Override code expired. Ask your lecturer for a new one.");
+      break;
+    case "override_invalid":
+      document.getElementById("f-override").classList.add("has-error");
+      showAlert("login-alert", "error", "Invalid override code — check and try again.");
+      break;
+    case "id_not_found":
+      document.getElementById("f-id").classList.add("has-error");
+      showAlert("login-alert", "error", "Student ID not registered.");
+      break;
+    case "name_mismatch":
+      document.getElementById("f-name").classList.add("has-error");
+      showAlert("login-alert", "error", "Name does not match the registered Student ID.");
+      break;
+    case "already_submitted":
+      showAlert("login-alert", "error", "You have already submitted this quiz.");
+      break;
+    case "invalid_code":
+    case "session_expired":
+      document.getElementById("f-code").classList.add("has-error");
+      showAlert("login-alert", "error", "Invalid or expired session code — check the board.");
+      break;
+    case "location_fail":
+      showAlert("login-alert", "error",
+        `You appear to be outside the classroom (${d.distance || "?"}m away, limit ${d.allowed || "?"}m). Ensure location services are enabled.`);
+      break;
+    default:
+      showAlert("login-alert", "error", d.message || "Login failed — please try again.");
+  }
+
+  btn.disabled = false; btn.textContent = "Start Quiz";
 }
-// ====================== QUIZ ======================
+
+// ═══════════════════════════════════════════════════════════
+//  QUIZ
+// ═══════════════════════════════════════════════════════════
 async function loadQuestions() {
   try {
-    const d = await post('questions', { id: currentUser.id });
+    const d = await api("questions", { id: currentUser.id });
     if (!d.ok) {
-      document.getElementById('loading-msg').textContent = 'Error loading questions: ' + (d.error || 'unknown');
+      document.getElementById("loading-msg").textContent = "Error: " + (d.error || "unknown");
       return;
     }
     quizQuestions = d.questions;
-    renderQuiz();
-    showPage('page-quiz');
-  } catch(e) {
-    document.getElementById('loading-msg').textContent = 'Error: ' + e.message;
+    _renderQuiz();
+    showPage("page-quiz");
+  } catch (e) {
+    document.getElementById("loading-msg").textContent = "Connection error: " + e.message;
   }
 }
 
-function renderQuiz() {
-  document.getElementById('quiz-welcome').textContent =
-    `Welcome, ${currentUser.name} (${currentUser.dept})! Answer all ${quizQuestions.length} questions.`;
+function _renderQuiz() {
+  document.getElementById("quiz-welcome").textContent =
+    `Welcome, ${currentUser.name} (${currentUser.dept}) — answer all ${quizQuestions.length} questions.`;
 
-  const container = document.getElementById('questions-container');
-  container.innerHTML = '';
+  const wrap = document.getElementById("questions-wrap");
+  wrap.innerHTML = "";
 
   quizQuestions.forEach((q, i) => {
-    const card = document.createElement('div');
-    card.className = 'card question-card';
-    card.id = `card-${q.id}`;
+    const card = document.createElement("div");
+    card.className = "card";
     card.innerHTML = `
-      <div class="question-number">Question ${i+1} of ${quizQuestions.length}</div>
-      <div class="question-text">${q.text} <span class="req">*</span></div>
-      ${q.options.map((o, idx) => `
-        <label class="option">
-          <input type="radio" name="${q.id}" value="${idx}" onchange="onAnswer('${q.id}', ${idx})">
-          <div class="radio-circle"><div class="radio-dot"></div></div>
-          <span class="option-label">${o}</span>
-        </label>`).join('')}
-      <div class="question-error" id="err-${q.id}">This question is required.</div>`;
-    container.appendChild(card);
+      <div class="q-card" id="card-${q.id}">
+        <div class="q-meta">Question ${i + 1} of ${quizQuestions.length}</div>
+        <div class="q-text">${q.text}<span class="req">*</span></div>
+        ${q.options.map((o, idx) => `
+          <label class="option">
+            <input type="radio" name="${q.id}" value="${idx}" onchange="onAnswer('${q.id}', ${idx})">
+            <div class="radio-outer"><div class="radio-inner"></div></div>
+            <span class="option-text">${o}</span>
+          </label>`).join("")}
+        <div class="q-err" id="err-${q.id}">This question is required.</div>
+      </div>`;
+    wrap.appendChild(card);
   });
-  updateProgress();
+  _updateProgress();
 }
 
 function onAnswer(qid, val) {
   answers[qid] = val;
-  document.getElementById(`err-${qid}`).classList.remove('visible');
-  updateProgress();
+  document.getElementById("err-" + qid).classList.remove("show");
+  _updateProgress();
 }
 
-function updateProgress() {
+function _updateProgress() {
   const pct = quizQuestions.length ? (Object.keys(answers).length / quizQuestions.length) * 100 : 0;
-  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById("progress-fill").style.width = pct + "%";
 }
 
 function clearForm() {
-  if (!confirm('Clear all answers?')) return;
+  if (!confirm("Clear all your answers?")) return;
   answers = {};
   quizQuestions.forEach(q => {
     document.querySelectorAll(`input[name="${q.id}"]`).forEach(r => r.checked = false);
-    document.getElementById(`err-${q.id}`).classList.remove('visible');
+    document.getElementById("err-" + q.id).classList.remove("show");
   });
-  updateProgress();
+  _updateProgress();
 }
 
 async function handleSubmit() {
   if (submitted) return;
-  const alertEl = document.getElementById('submit-alert');
-  alertEl.classList.remove('visible');
+  hideAlert("submit-alert");
 
   let allOk = true;
   quizQuestions.forEach(q => {
     if (answers[q.id] === undefined) {
-      document.getElementById(`err-${q.id}`).classList.add('visible');
+      document.getElementById("err-" + q.id).classList.add("show");
       allOk = false;
     }
   });
+  if (!allOk) return showAlert("submit-alert", "error", "Please answer all questions before submitting.");
 
-  if (!allOk) return showAlert(alertEl, 'Please answer all questions before submitting.');
-
-  const btn = document.getElementById('submit-btn');
-  btn.disabled = true; btn.textContent = 'Submitting…';
+  const btn = document.getElementById("submit-btn");
+  btn.disabled = true; btn.textContent = "Submitting…";
 
   try {
-    const d = await post('submit', { id: currentUser.id, name: currentUser.name, answers });
-    if (d.ok) {
-      submitted = true;
-      showResults(d);
-    } else {
-      showAlert(alertEl, 'Submission failed: ' + (d.error || 'unknown error'));
-      btn.disabled = false; btn.textContent = 'Submit';
+    const d = await api("submit", { id: currentUser.id, name: currentUser.name, answers });
+    if (d.ok) { submitted = true; _showResults(d); }
+    else {
+      showAlert("submit-alert", "error", "Submission failed: " + (d.error || "unknown"));
+      btn.disabled = false; btn.textContent = "Submit";
     }
-  } catch(e) {
-    showAlert(alertEl, 'Connection error: ' + e.message);
-    btn.disabled = false; btn.textContent = 'Submit';
+  } catch (e) {
+    showAlert("submit-alert", "error", "Connection error: " + e.message);
+    btn.disabled = false; btn.textContent = "Submit";
   }
 }
 
-function showResults(data) {
-  const { score, total, gradedAnswers } = data;
+function _showResults({ score, total, gradedAnswers }) {
   const pct  = Math.round(score / total * 100);
   const pass = pct >= 60;
 
-  const review = quizQuestions.map((q, i) => {
+  const reviewHtml = quizQuestions.map((q, i) => {
     const g = gradedAnswers[q.id];
-    return `<div class="review-item ${g.isCorrect?'correct':'wrong'}">
-      <div class="review-q">Q${i+1}. ${q.text}</div>
-      <div class="review-a">Your answer: <strong>${q.options[g.userAnswer]||'No answer'}</strong></div>
-      ${!g.isCorrect ? `<div class="review-a">Correct: <strong>${q.options[g.correctAnswer]}</strong></div>` : ''}
-      <div class="review-status">${g.isCorrect?'✓ Correct':'✗ Incorrect'}</div>
+    return `<div class="review-item ${g.isCorrect ? "correct" : "wrong"}">
+      <div class="review-q">Q${i + 1}. ${q.text}</div>
+      <div class="review-a">Your answer: <strong>${q.options[g.userAnswer] || "No answer"}</strong></div>
+      ${!g.isCorrect ? `<div class="review-a">Correct: <strong>${q.options[g.correctAnswer]}</strong></div>` : ""}
+      <div class="review-verdict">${g.isCorrect ? "✓ Correct" : "✗ Incorrect"}</div>
     </div>`;
-  }).join('');
+  }).join("");
 
-  document.getElementById('result-content').innerHTML = `
-    <div class="result-icon ${pass?'pass':'fail'}">${pass?'🎉':'📝'}</div>
-    <div class="result-title">${pass?'Well done!':'Keep practising!'}</div>
+  document.getElementById("result-body").innerHTML = `
+    <div class="result-icon">${pass ? "🎉" : "📝"}</div>
+    <div class="result-title">${pass ? "Well done!" : "Keep practising!"}</div>
     <div class="result-score">${score}/${total}</div>
-    <div class="result-meta">You scored <strong>${pct}%</strong></div>
-    <div class="answer-review"><div class="review-heading">Answer Review</div>${review}</div>`;
+    <div class="result-pct">You scored <strong>${pct}%</strong></div>
+    <div class="review">
+      <div class="review-heading">Answer Review</div>
+      ${reviewHtml}
+    </div>`;
 
-  showPage('page-result');
+  showPage("page-result");
 }
 
+// ═══════════════════════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════════════════════
 function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 }
 
-function showAlert(el, msg) {
+function showAlert(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = "alert alert-" + type + " show";
   el.textContent = msg;
-  el.classList.add('visible');
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('page-login').classList.contains('active')) handleLogin();
+function hideAlert(id) {
+  const el = document.getElementById(id);
+  el.classList.remove("show");
+}
+
+function _sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && document.getElementById("page-login").classList.contains("active")) handleLogin();
 });
 
-// ── Startup ──────────────────────────────────────
-// Kick off fingerprint and GPS in parallel.
-// The login button is disabled until fingerprint resolves (FIX-D).
+// ── Startup: run GPS and fingerprint in parallel ──────────
 initGPS();
 computeFingerprint();
 </script>
