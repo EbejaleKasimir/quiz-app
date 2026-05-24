@@ -1076,6 +1076,101 @@ async function handleLogin() {
 }
 
 // ═══════════════════════════════════════════════════════════
+//  SHUFFLE ENGINE
+//
+//  Every student gets a unique, reproducible order.
+//
+//  SEED DESIGN:
+//  seed = hash(studentId + today's date)
+//  — Different students → different seeds → different orders
+//  — Same student on same day → same seed → stable order on refresh
+//  — New day → new seed → different order (prevents memorisation)
+//
+//  We use a seeded linear congruential generator (LCG) — tiny,
+//  no dependencies, deterministic across all browsers.
+//
+//  ANSWER REMAPPING:
+//  Options are shuffled, so the visual position of the correct
+//  answer changes. We track optionMap[qid] = array where
+//  optionMap[qid][shuffledIdx] = originalIdx.
+//  When a student picks shuffled position 2, we look up
+//  optionMap[qid][2] to get the original index, and send THAT
+//  to the backend. The backend always grades original indices.
+// ═══════════════════════════════════════════════════════════
+
+// optionMap[qid][shuffledPosition] = originalIndex
+// Populated during shuffle, read during submit and result display.
+let optionMap = {};
+
+function _makeSeed(studentId) {
+  // Combine student ID with today's date string for daily uniqueness
+  const raw = String(studentId).toUpperCase() + new Date().toISOString().slice(0, 10);
+  let h = 2166136261; // FNV-1a 32-bit offset basis
+  for (let i = 0; i < raw.length; i++) {
+    h ^= raw.charCodeAt(i);
+    h = (h * 16777619) >>> 0; // unsigned 32-bit
+  }
+  return h;
+}
+
+function _makeLCG(seed) {
+  // Park-Miller LCG — period 2^31-1, well-distributed
+  let s = seed >>> 0 || 1;
+  return function () {
+    s = Math.imul(s, 48271) >>> 0;
+    return s / 0x100000000; // [0, 1)
+  };
+}
+
+// Fisher-Yates shuffle using the provided RNG
+function _shuffle(arr, rng) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Shuffle questions and options, build optionMap for answer remapping.
+// Returns a new questions array with shuffled order; original array untouched.
+function _applyShuffles(questions, studentId) {
+  const rng = _makeLCG(_makeSeed(studentId));
+  optionMap = {};
+
+  // 1. Shuffle question order
+  const shuffledQs = _shuffle(questions, rng);
+
+  // 2. For each question, shuffle its options and record the mapping
+  return shuffledQs.map(q => {
+    const originalIndices = [0, 1, 2, 3];
+    const shuffledIndices = _shuffle(originalIndices, rng);
+
+    // shuffledIndices[newPos] = originalIdx
+    optionMap[q.id] = shuffledIndices;
+
+    // Build the shuffled options and optImages arrays
+    const shuffledOptions  = shuffledIndices.map(i => q.options[i]);
+    const origImgs = q.optImages || ["", "", "", ""];
+    const shuffledOptImages = shuffledIndices.map(i => origImgs[i]);
+
+    return { ...q, options: shuffledOptions, optImages: shuffledOptImages };
+  });
+}
+
+// Convert shuffled answer positions back to original indices before submit.
+// answers[qid] = shuffledPosition  →  originalAnswers[qid] = originalIndex
+function _remapAnswers(answers) {
+  const remapped = {};
+  for (const qid in answers) {
+    const shuffledPos = answers[qid];
+    const map = optionMap[qid];
+    remapped[qid] = map ? map[shuffledPos] : shuffledPos;
+  }
+  return remapped;
+}
+
+// ═══════════════════════════════════════════════════════════
 //  QUIZ
 // ═══════════════════════════════════════════════════════════
 async function loadQuestions() {
@@ -1085,7 +1180,9 @@ async function loadQuestions() {
       document.getElementById("loading-msg").textContent = "Error: " + (d.error || "unknown");
       return;
     }
-    quizQuestions = d.questions;
+    // Apply per-student shuffle before storing — quizQuestions holds
+    // the shuffled version that the UI renders from.
+    quizQuestions = _applyShuffles(d.questions, currentUser.id);
     _renderQuiz();
     showPage("page-quiz");
   } catch (e) {
@@ -1113,28 +1210,29 @@ function _renderQuiz() {
       </div>` : "";
 
     // ── Options ────────────────────────────────────────────
-    // Detect if ALL four options have images → use 2×2 grid layout
-    const optImgs   = q.optImages || ["", "", "", ""];
+    // Note: q.options and q.optImages are already shuffled at this point.
+    // onAnswer() stores the SHUFFLED position; _remapAnswers() converts
+    // back to original index at submit time.
+    const optImgs    = q.optImages || ["", "", "", ""];
     const allImgOpts = optImgs.every(u => u);
     const optWrapOpen  = allImgOpts ? `<div class="options-grid">` : "";
     const optWrapClose = allImgOpts ? `</div>` : "";
 
-    const optionsHtml = q.options.map((o, idx) => {
-      const imgUrl = optImgs[idx] || "";
+    const optionsHtml = q.options.map((o, shuffledIdx) => {
+      const imgUrl  = optImgs[shuffledIdx] || "";
       const imgHtml = imgUrl ? `
         <div class="opt-img-wrap">
-          <img class="opt-img" src="${imgUrl}" alt="Option ${idx + 1} image"
+          <img class="opt-img" src="${imgUrl}" alt="Option image"
             onerror="this.parentElement.style.display='none'">
         </div>` : "";
 
-      // Show text if: there's text AND (no image, OR the text is meaningful)
-      // Hide text only if the option is blank AND there's an image (image-only option)
       const showText = o && o.trim();
       const textHtml = showText ? `<span class="option-text">${o}</span>` : "";
 
       return `
         <label class="option">
-          <input type="radio" name="${q.id}" value="${idx}" onchange="onAnswer('${q.id}', ${idx})">
+          <input type="radio" name="${q.id}" value="${shuffledIdx}"
+            onchange="onAnswer('${q.id}', ${shuffledIdx})">
           <div class="radio-outer"><div class="radio-inner"></div></div>
           <div class="option-body">
             ${imgHtml}
@@ -1156,8 +1254,9 @@ function _renderQuiz() {
   _updateProgress();
 }
 
-function onAnswer(qid, val) {
-  answers[qid] = val;
+// Store the SHUFFLED position — remapped to original at submit time
+function onAnswer(qid, shuffledPos) {
+  answers[qid] = shuffledPos;
   document.getElementById("err-" + qid).classList.remove("show");
   _updateProgress();
 }
@@ -1193,8 +1292,11 @@ async function handleSubmit() {
   const btn = document.getElementById("submit-btn");
   btn.disabled = true; btn.textContent = "Submitting…";
 
+  // Remap shuffled positions → original indices before sending to backend
+  const originalAnswers = _remapAnswers(answers);
+
   try {
-    const d = await api("submit", { id: currentUser.id, name: currentUser.name, answers });
+    const d = await api("submit", { id: currentUser.id, name: currentUser.name, answers: originalAnswers });
     if (d.ok) { submitted = true; _showResults(d); }
     else {
       showAlert("submit-alert", "error", "Submission failed: " + (d.error || "unknown"));
@@ -1210,29 +1312,41 @@ function _showResults({ score, total, gradedAnswers }) {
   const pct  = Math.round(score / total * 100);
   const pass = pct >= 60;
 
+  // Results use the ORIGINAL question order and ORIGINAL option indices
+  // from gradedAnswers (which the backend computed from original indices).
+  // We need to display using original options/images, not the shuffled ones.
+  // quizQuestions is shuffled, so we rebuild a lookup by id from the raw data.
   const reviewHtml = quizQuestions.map((q, i) => {
     const g = gradedAnswers[q.id];
-    const optImgs = q.optImages || ["", "", "", ""];
 
-    // User's answer label — text if available, else "Option N"
-    const userOptText = q.options[g.userAnswer] || "";
-    const userOptImg  = optImgs[g.userAnswer] || "";
+    // Recover original option arrays via optionMap to display correct labels
+    const map       = optionMap[q.id] || [0, 1, 2, 3];
+    const origOpts  = [0, 1, 2, 3].map(origIdx => q.options[map.indexOf(origIdx)]);
+    const origImgs  = [0, 1, 2, 3].map(origIdx => (q.optImages || ["","","",""])[map.indexOf(origIdx)]);
+
+    const userOptText = origOpts[g.userAnswer]  || "";
+    const userOptImg  = origImgs[g.userAnswer]  || "";
+    const corrOptText = origOpts[g.correctAnswer] || "";
+    const corrOptImg  = origImgs[g.correctAnswer] || "";
+
     const userAnsHtml = userOptImg
       ? `<div class="opt-img-wrap" style="max-width:140px;margin-top:4px">
-           <img class="opt-img" src="${userOptImg}" alt="Your answer" onerror="this.parentElement.style.display='none'">
+           <img class="opt-img" src="${userOptImg}" alt="Your answer"
+             onerror="this.parentElement.style.display='none'">
          </div>${userOptText ? `<span style="font-size:12px">${userOptText}</span>` : ""}`
       : `<strong>${userOptText || "No answer"}</strong>`;
 
-    const corrOptText = q.options[g.correctAnswer] || "";
-    const corrOptImg  = optImgs[g.correctAnswer] || "";
     const corrAnsHtml = corrOptImg
       ? `<div class="opt-img-wrap" style="max-width:140px;margin-top:4px">
-           <img class="opt-img" src="${corrOptImg}" alt="Correct answer" onerror="this.parentElement.style.display='none'">
+           <img class="opt-img" src="${corrOptImg}" alt="Correct answer"
+             onerror="this.parentElement.style.display='none'">
          </div>${corrOptText ? `<span style="font-size:12px">${corrOptText}</span>` : ""}`
       : `<strong>${corrOptText}</strong>`;
 
     const qImgHtml = q.imageUrl
-      ? `<img src="${q.imageUrl}" alt="Question image" style="max-width:100%;max-height:120px;border-radius:6px;margin-bottom:6px;display:block;object-fit:contain" onerror="this.style.display='none'">`
+      ? `<img src="${q.imageUrl}" alt="Question image"
+           style="max-width:100%;max-height:120px;border-radius:6px;margin-bottom:6px;display:block;object-fit:contain"
+           onerror="this.style.display='none'">`
       : "";
 
     return `<div class="review-item ${g.isCorrect ? "correct" : "wrong"}">
