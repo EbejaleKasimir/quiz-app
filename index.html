@@ -581,14 +581,14 @@ canvas#cam-canvas { display: none; }
 // ═══════════════════════════════════════════════════════════
 //  CONFIG
 // ═══════════════════════════════════════════════════════════
-const API_URL = "https://script.google.com/macros/s/AKfycbwQVkySuaAukMNrd654fErQAaLkOxaDYv_bsoYC2UK0Mh4g9GGaIezcKCalKOT1ShSaXw/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwgxgBy6zDZsoZFEtguhNJR-Pt9fg7N7zKOyrJmzwKaXVb8vcA3E901UIKIO3uD5nYXZg/exec";
 
 // ═══════════════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════════════
 let currentUser = null;
 let quizQuestions = [], answers = {}, submitted = false;
-let userLat = null, userLng = null, gpsReady = false;
+let userLat = null, userLng = null, gpsReady = false, gpsAccuracy = null;
 let selfieData = null, selfieOk = false, camStream = null;
 let fpValue = null, fpState = "computing"; // "computing" | "ready" | "error"
 
@@ -805,10 +805,10 @@ function _onGPSUpdate(pos) {
   const lat = pos.coords.latitude;
   const lng = pos.coords.longitude;
 
-  // Always store the latest coordinates regardless of accuracy
-  // (used as best-available fallback)
+  // Always store the latest coordinates and accuracy
   userLat = lat;
   userLng = lng;
+  gpsAccuracy = acc;  // ← sent to server for spoofing analysis
 
   // Track the best accuracy seen
   if (acc < gpsBestAccuracy) gpsBestAccuracy = acc;
@@ -845,7 +845,7 @@ function retryGPS() {
   if (gpsWatcher)   { navigator.geolocation.clearWatch(gpsWatcher); gpsWatcher = null; }
   if (gpsHardTimer) { clearTimeout(gpsHardTimer); gpsHardTimer = null; }
   gpsReady = false;
-  userLat = null; userLng = null;
+  userLat = null; userLng = null; gpsAccuracy = null;
   gpsBestAccuracy = Infinity;
   _startGPS();
 }
@@ -988,7 +988,7 @@ async function handleLogin() {
 
   for (let attempt = 1; attempt <= MAX; attempt++) {
     try {
-      const payload = { id, name, code, lat: userLat, lng: userLng, fingerprint: fpValue, selfie: selfieData };
+      const payload = { id, name, code, lat: userLat, lng: userLng, gpsAccuracy, fingerprint: fpValue, selfie: selfieData };
       if (ov) payload.overrideCode = ov;
       d = await api("login", payload);
 
