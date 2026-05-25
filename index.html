@@ -705,7 +705,7 @@ canvas#cam-canvas { display: none; }
 // ═══════════════════════════════════════════════════════════
 //  CONFIG
 // ═══════════════════════════════════════════════════════════
-const API_URL = "https://script.google.com/macros/s/AKfycbxsQ51uEEUdajOiv15F8bP4xeCssh-u5_hGUlAq-5qu-gxfpCtoWupSdv134AeLt9sW5g/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwgxgBy6zDZsoZFEtguhNJR-Pt9fg7N7zKOyrJmzwKaXVb8vcA3E901UIKIO3uD5nYXZg/exec";
 
 // ═══════════════════════════════════════════════════════════
 //  STATE
@@ -895,19 +895,26 @@ let gpsHardTimer = null;
 let gpsBestAccuracy = Infinity;   // Track best fix seen so far
 
 function initGPS() {
-  // If GPS is not required for this session, mark ready immediately
-  // and hide the GPS status bar — students don't need to wait for location
-  if (!sessionGpsRequired) {
-    gpsReady = true;
-    userLat = 0; userLng = 0; gpsAccuracy = null;
-    document.getElementById("gps-bar").style.display = "none";
-    return;
-  }
+  // Always start GPS on page load — we don't yet know if the session
+  // requires it (that's returned after login). If the session turns out
+  // not to require GPS, _disableGPS() is called after login succeeds.
   if (!navigator.geolocation) {
     setGpsState("fail", "GPS not supported by this browser");
     return;
   }
   _startGPS();
+}
+
+// Called after login when server confirms GPS is not required.
+// Cancels the watcher, marks ready, hides the bar.
+function _disableGPS() {
+  if (gpsWatcher)   { navigator.geolocation.clearWatch(gpsWatcher); gpsWatcher = null; }
+  if (gpsHardTimer) { clearTimeout(gpsHardTimer); gpsHardTimer = null; }
+  gpsReady    = true;
+  userLat     = 0;
+  userLng     = 0;
+  gpsAccuracy = null;
+  document.getElementById("gps-bar").style.display = "none";
 }
 
 function _startGPS() {
