@@ -715,9 +715,10 @@ let quizQuestions = [], answers = {}, submitted = false;
 let userLat = null, userLng = null, gpsReady = false, gpsAccuracy = null;
 let selfieData = null, selfieOk = false, camStream = null;
 let fpValue = null, fpState = "computing";
-let quizMinutes = 30;      // set from server after login
-let timerInterval = null;  // setInterval handle for countdown
-let timerEndsAt = null;    // absolute timestamp when timer expires
+let quizMinutes = 30;
+let timerInterval = null;
+let timerEndsAt = null;
+let sessionGpsRequired = true; // updated from server after login
 
 // ═══════════════════════════════════════════════════════════
 //  FINGERPRINT
@@ -894,6 +895,14 @@ let gpsHardTimer = null;
 let gpsBestAccuracy = Infinity;   // Track best fix seen so far
 
 function initGPS() {
+  // If GPS is not required for this session, mark ready immediately
+  // and hide the GPS status bar — students don't need to wait for location
+  if (!sessionGpsRequired) {
+    gpsReady = true;
+    userLat = 0; userLng = 0; gpsAccuracy = null;
+    document.getElementById("gps-bar").style.display = "none";
+    return;
+  }
   if (!navigator.geolocation) {
     setGpsState("fail", "GPS not supported by this browser");
     return;
@@ -1103,7 +1112,8 @@ async function handleLogin() {
     return showAlert("login-alert", "error", "Session code must be exactly 6 digits.");
   }
   if (!selfieOk)   return showAlert("login-alert", "error", "Please take a selfie first.");
-  if (!gpsReady)   return showAlert("login-alert", "error", "Location not ready — wait a moment or tap Retry.");
+  if (!gpsReady && sessionGpsRequired)
+    return showAlert("login-alert", "error", "Location not ready — wait a moment or tap Retry.");
   if (fpState !== "ready" || !fpValue)
     return showAlert("login-alert", "error", "Device identification not ready — see status bar above.");
 
@@ -1140,8 +1150,9 @@ async function handleLogin() {
   }
 
   if (d.ok) {
-    currentUser = { id, name: d.name || name, dept: d.dept };
-    quizMinutes = d.quizMinutes || 30;
+    currentUser        = { id, name: d.name || name, dept: d.dept };
+    quizMinutes        = d.quizMinutes || 30;
+    sessionGpsRequired = d.gpsRequired !== false; // default true
     _stopCamera();
     if (gpsWatcher)   { navigator.geolocation.clearWatch(gpsWatcher); gpsWatcher = null; }
     if (gpsHardTimer) { clearTimeout(gpsHardTimer); gpsHardTimer = null; }
