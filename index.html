@@ -907,16 +907,26 @@ function initGPS() {
 
 // Called after login when server confirms GPS is not required.
 // Cancels the watcher, marks ready, hides the bar.
+
 function _disableGPS() {
   if (gpsWatcher)   { navigator.geolocation.clearWatch(gpsWatcher); gpsWatcher = null; }
   if (gpsHardTimer) { clearTimeout(gpsHardTimer); gpsHardTimer = null; }
+  
   gpsReady    = true;
   userLat     = 0;
   userLng     = 0;
   gpsAccuracy = null;
-  document.getElementById("gps-bar").style.display = "none";
+  
+  const bar = document.getElementById("gps-bar");
+  bar.className = "status-bar ok";
+  document.getElementById("gps-msg").textContent = "GPS check disabled for this session ✓";
+  document.getElementById("gps-retry").style.display = "none";
+  
+  // Hide after a short delay so student sees confirmation
+  setTimeout(() => {
+    bar.style.display = "none";
+  }, 1200);
 }
-
 function _startGPS() {
   gpsBestAccuracy = Infinity;
   setGpsState("pending", "Acquiring GPS… please keep phone still");
@@ -1160,14 +1170,21 @@ async function handleLogin() {
     currentUser        = { id, name: d.name || name, dept: d.dept };
     quizMinutes        = d.quizMinutes || 30;
     sessionGpsRequired = d.gpsRequired !== false; // default true
+    
+    // NEW: Properly handle GPS-disabled sessions
+    if (!sessionGpsRequired) {
+      _disableGPS();
+    } else {
+      // Only clear watchers if GPS was required (we were using it)
+      if (gpsWatcher)   { navigator.geolocation.clearWatch(gpsWatcher); gpsWatcher = null; }
+      if (gpsHardTimer) { clearTimeout(gpsHardTimer); gpsHardTimer = null; }
+    }
+    
     _stopCamera();
-    if (gpsWatcher)   { navigator.geolocation.clearWatch(gpsWatcher); gpsWatcher = null; }
-    if (gpsHardTimer) { clearTimeout(gpsHardTimer); gpsHardTimer = null; }
     showPage("page-loading");
     await loadQuestions();
     return;
   }
-
   // Error routing
   switch (d.error) {
     case "device_in_use":
