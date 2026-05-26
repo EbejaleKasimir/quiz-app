@@ -1685,8 +1685,8 @@ function _showModal(icon, title, body, score) {
 const _explainCache = {}; // qid → explanation text
 
 async function explainAnswer(qid) {
-  const btn     = document.getElementById("explain-btn-" + qid);
-  const box     = document.getElementById("explain-box-" + qid);
+  const btn = document.getElementById("explain-btn-" + qid);
+  const box = document.getElementById("explain-box-" + qid);
   if (!btn || !box) return;
 
   // Serve from cache
@@ -1702,75 +1702,38 @@ async function explainAnswer(qid) {
   box.innerHTML = `<span class="explain-cursor"></span>`;
   box.classList.add("show");
 
-  // Find this question in quizQuestions (shuffled) and recover original data
-  const q   = quizQuestions.find(q => q.id === qid);
+  // Find this question in quizQuestions
+  const q = quizQuestions.find(q => q.id === qid);
   if (!q) { box.textContent = "Question data not found."; return; }
 
-  // Recover original option order for the explanation
+  // Recover original option order via optionMap
   const map      = optionMap[qid] || [0, 1, 2, 3];
   const origOpts = [0, 1, 2, 3].map(origIdx => q.options[map.indexOf(origIdx)]);
 
-  // We need the correct answer original index from the graded result
-  // It's stored on the button as a data attribute
+  // Correct answer original index stored on the button
   const correctOrigIdx = parseInt(btn.dataset.correct);
-  const letters = ["A", "B", "C", "D"];
-
-  const optionLines = origOpts.map((o, i) =>
-    `${letters[i]}. ${o}${i === correctOrigIdx ? " ✓ (correct)" : ""}`
-  ).join("\n");
-
-  const prompt =
-    `A student just completed a quiz. Explain in 2-3 clear sentences why the correct answer is right. Be concise and educational.\n\n` +
-    `Question: ${q.text}\n\nOptions:\n${optionLines}\n\n` +
-    `Correct answer: ${letters[correctOrigIdx]}. ${origOpts[correctOrigIdx]}\n\n` +
-    `Explain why this answer is correct:`;
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 300,
-        stream: true,
-        messages: [{ role: "user", content: prompt }]
-      })
+    const d = await api("explain", {
+      question:     q.text,
+      options:      origOpts,
+      correctIndex: correctOrigIdx
     });
 
-    if (!response.ok) throw new Error("API error " + response.status);
-
-    const reader  = response.body.getReader();
-    const decoder = new TextDecoder();
-    let   full    = "";
-    box.innerHTML = `<span class="explain-cursor"></span>`;
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value, { stream: true });
-      for (const line of chunk.split("\n")) {
-        if (!line.startsWith("data: ")) continue;
-        const data = line.slice(6).trim();
-        if (data === "[DONE]") break;
-        try {
-          const obj = JSON.parse(data);
-          if (obj.type === "content_block_delta" && obj.delta?.text) {
-            full += obj.delta.text;
-            box.innerHTML = full + `<span class="explain-cursor"></span>`;
-          }
-        } catch (_) {}
-      }
+    if (d.ok && d.explanation) {
+      box.textContent      = d.explanation;
+      _explainCache[qid]   = d.explanation;
+      btn.textContent      = "✓ Explained";
+      btn.disabled         = false;
+    } else {
+      box.textContent = "Could not load explanation — please try again.";
+      btn.textContent = "⚡ Explain answer";
+      btn.disabled    = false;
     }
 
-    box.textContent = full || "No explanation available.";
-    _explainCache[qid] = full;
-    btn.textContent = "✓ Explained";
-    btn.disabled    = false;
-
   } catch (e) {
-    box.textContent = "Could not load explanation: " + e.message;
-    btn.textContent = "⚡ Explain";
+    box.textContent = "Connection error: " + e.message;
+    btn.textContent = "⚡ Explain answer";
     btn.disabled    = false;
   }
 }
