@@ -1689,7 +1689,6 @@ async function explainAnswer(qid) {
   const box = document.getElementById("explain-box-" + qid);
   if (!btn || !box) return;
 
-  // Serve from cache
   if (_explainCache[qid]) {
     box.textContent = _explainCache[qid];
     box.classList.add("show");
@@ -1702,38 +1701,54 @@ async function explainAnswer(qid) {
   box.innerHTML = `<span class="explain-cursor"></span>`;
   box.classList.add("show");
 
-  // Find this question in quizQuestions
   const q = quizQuestions.find(q => q.id === qid);
   if (!q) { box.textContent = "Question data not found."; return; }
 
-  // Recover original option order via optionMap
   const map      = optionMap[qid] || [0, 1, 2, 3];
   const origOpts = [0, 1, 2, 3].map(origIdx => q.options[map.indexOf(origIdx)]);
-
-  // Correct answer original index stored on the button
   const correctOrigIdx = parseInt(btn.dataset.correct);
 
   try {
-    const d = await api("explain", {
-      question:     q.text,
-      options:      origOpts,
-      correctIndex: correctOrigIdx
+    // Manually fetch so we can inspect the raw response
+    const raw = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        action:       "explain",
+        question:     q.text,
+        options:      origOpts,
+        correctIndex: correctOrigIdx
+      })
     });
-    
+
+    const text = await raw.text();
+    console.log("explain raw response:", text);   // Open DevTools → Console to see this
+
+    let d;
+    try {
+      d = JSON.parse(text);
+    } catch (_) {
+      box.textContent = "Non-JSON response: " + text.slice(0, 200);
+      btn.textContent = "⚡ Explain answer";
+      btn.disabled = false;
+      return;
+    }
+
+    console.log("explain parsed:", d);
+
     if (d.ok && d.explanation) {
-        box.textContent      = d.explanation;
-        _explainCache[qid]   = d.explanation;
-        btn.textContent      = "✓ Explained";
-        btn.disabled         = false;
-      } else {
-        // Show the actual error so you can diagnose it
-        box.textContent = d.explanation || "Unknown error — check Apps Script logs.";
-        btn.textContent = "⚡ Explain answer";
-        btn.disabled    = false;
-      }
-  
+      box.textContent    = d.explanation;
+      _explainCache[qid] = d.explanation;
+      btn.textContent    = "✓ Explained";
+      btn.disabled       = false;
+    } else {
+      box.textContent = d.explanation || d.error || JSON.stringify(d);
+      btn.textContent = "⚡ Explain answer";
+      btn.disabled    = false;
+    }
+
   } catch (e) {
-    box.textContent = "Connection error: " + e.message;
+    box.textContent = "Fetch error: " + e.message;
     btn.textContent = "⚡ Explain answer";
     btn.disabled    = false;
   }
