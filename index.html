@@ -1129,8 +1129,10 @@ async function handleLogin() {
     return showAlert("login-alert", "error", "Session code must be exactly 6 digits.");
   }
   if (!selfieOk)   return showAlert("login-alert", "error", "Please take a selfie first.");
-  if (!gpsReady && sessionGpsRequired)
-    return showAlert("login-alert", "error", "Location not ready — wait a moment or tap Retry.");
+  if (!gpsReady && sessionGpsRequired) {
+    // Show a non-blocking warning; server will reject if truly outside radius
+    // Don't return — let the request proceed
+  }
   if (fpState !== "ready" || !fpValue)
     return showAlert("login-alert", "error", "Device identification not ready — see status bar above.");
 
