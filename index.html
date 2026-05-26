@@ -1719,18 +1719,19 @@ async function explainAnswer(qid) {
       options:      origOpts,
       correctIndex: correctOrigIdx
     });
-
+    
     if (d.ok && d.explanation) {
-      box.textContent      = d.explanation;
-      _explainCache[qid]   = d.explanation;
-      btn.textContent      = "✓ Explained";
-      btn.disabled         = false;
-    } else {
-      box.textContent = "Could not load explanation — please try again.";
-      btn.textContent = "⚡ Explain answer";
-      btn.disabled    = false;
-    }
-
+        box.textContent      = d.explanation;
+        _explainCache[qid]   = d.explanation;
+        btn.textContent      = "✓ Explained";
+        btn.disabled         = false;
+      } else {
+        // Show the actual error so you can diagnose it
+        box.textContent = d.explanation || "Unknown error — check Apps Script logs.";
+        btn.textContent = "⚡ Explain answer";
+        btn.disabled    = false;
+      }
+  
   } catch (e) {
     box.textContent = "Connection error: " + e.message;
     btn.textContent = "⚡ Explain answer";
