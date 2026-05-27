@@ -1353,10 +1353,18 @@ async function loadQuestions() {
       return;
     }
     quizQuestions = _applyShuffles(d.questions, currentUser.id);
-    _renderQuiz();
-    showPage("page-quiz");
-    _startTimer(quizMinutes);
-  } catch (e) {
+  _renderQuiz();
+  showPage("page-quiz");
+  
+  // Reset submit button state
+  const submitBtn = document.getElementById("submit-btn");
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Submit";
+  }
+  
+  _startTimer(quizMinutes);
+} catch (e) {
     document.getElementById("loading-msg").textContent = "Connection error: " + e.message;
   }
 }
