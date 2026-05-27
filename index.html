@@ -1299,22 +1299,28 @@ function _shuffle(arr, rng) {
 
 // Shuffle questions and options, build optionMap for answer remapping.
 // Returns a new questions array with shuffled order; original array untouched.
-function _applyShuffles(questions, studentId) {
-  const rng = _makeLCG(_makeSeed(studentId));
+  
+function _applyShuffles(questions, studentId) {  // studentId not used anymore
   optionMap = {};
 
-  // 1. Shuffle question order
-  const shuffledQs = _shuffle(questions, rng);
+  // 1. Shuffle question order using Math.random()
+  const shuffledQs = [...questions];
+  for (let i = shuffledQs.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledQs[i], shuffledQs[j]] = [shuffledQs[j], shuffledQs[i]];
+  }
 
-  // 2. For each question, shuffle its options and record the mapping
+  // 2. For each question, shuffle options using Math.random()
   return shuffledQs.map(q => {
     const originalIndices = [0, 1, 2, 3];
-    const shuffledIndices = _shuffle(originalIndices, rng);
-
-    // shuffledIndices[newPos] = originalIdx
+    for (let i = originalIndices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [originalIndices[i], originalIndices[j]] = [originalIndices[j], originalIndices[i]];
+    }
+    // originalIndices now holds shuffled mapping: newPos → originalIdx
+    const shuffledIndices = originalIndices;
     optionMap[q.id] = shuffledIndices;
 
-    // Build the shuffled options and optImages arrays
     const shuffledOptions  = shuffledIndices.map(i => q.options[i]);
     const origImgs = q.optImages || ["", "", "", ""];
     const shuffledOptImages = shuffledIndices.map(i => origImgs[i]);
@@ -1322,6 +1328,7 @@ function _applyShuffles(questions, studentId) {
     return { ...q, options: shuffledOptions, optImages: shuffledOptImages };
   });
 }
+  
 
 // Convert shuffled answer positions back to original indices before submit.
 // answers[qid] = shuffledPosition  →  originalAnswers[qid] = originalIndex
@@ -1430,6 +1437,18 @@ function _updateProgress() {
   document.getElementById("progress-fill").style.width = pct + "%";
 }
 
+  function retryQuiz() {
+  if (!confirm("Start a new attempt with fresh random questions? Your previous score will remain on record.")) return;
+  submitted = false;
+  answers = {};
+  // Stop any running timer
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  try { sessionStorage.removeItem(TIMER_KEY); } catch(_) {}
+  // Reload quiz with fresh shuffle
+  showPage("page-loading");
+  loadQuestions();
+}
+  
 function clearForm() {
   if (!confirm("Clear all your answers?")) return;
   answers = {};
@@ -1538,7 +1557,13 @@ function _showResults({ score, total, gradedAnswers }) {
       <div class="review-heading">Answer Review</div>
       ${reviewHtml}
     </div>`;
-
+    const retryHtml = `
+      <div style="text-align:center; margin-top:24px;">
+        <button class="btn btn-accent" onclick="retryQuiz()">
+          🔄 Retry Quiz (New Random Questions)
+        </button>
+      </div>`;
+    document.getElementById("result-body").innerHTML += retryHtml;
   showPage("page-result");
 }
 
